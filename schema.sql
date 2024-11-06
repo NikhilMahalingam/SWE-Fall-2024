@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS User_Account(
 	name VARCHAR(100) NOT NULL,
     password VARCHAR(100) NOT NULL,
     email VARCHAR(100) NOT NULL,
-    CHECK (email LIKE '%@%'),
+    CHECK (email REGEXP '^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'),
     role ENUM('Admin') NULL
 );
 
