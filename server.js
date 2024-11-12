@@ -106,7 +106,6 @@ function addPart(request, response) {
           newPart = JSON.parse(body);
           sqlStatement = "INSERT INTO Computer_Part(part_name, brand, size, date_posted, unit_price) VALUES ('" + newPart.partName + "','"+ 
             newPart.brand + "'," + newPart.size + ",'" + newPart.dateTime + "'," + newPart.unitPrice + ")";
-          console.log(sqlStatement);
           dBCon.query(sqlStatement, function (err, result) {
             if (err) {
               resMsg.message = "Service Unavailable";
