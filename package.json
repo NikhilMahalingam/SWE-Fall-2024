@@ -1,0 +1,16 @@
+{
+  "name": "swe-fall-2024",
+  "version": "1.0.0",
+  "description": "ECE 452 SWE Project",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.21.1",
+    "mysql2": "^3.11.4"
+  }
+}
