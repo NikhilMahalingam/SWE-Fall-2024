@@ -1,10 +1,11 @@
-var express = require('express');
-var route = express();
-var sql = require("mysql2");
+const express = require('express');
+const route = express();
+const sql = require("mysql2");
+const { generatePCBuild } = require('./openaiHandler')
 
 function initiateDBConnection() {
     //Create SQL connection logic
-    var connection = sql.createConnection({
+    const connection = sql.createConnection({
         host: "localhost",
         user: "root",
         password: "password",
@@ -15,8 +16,8 @@ function initiateDBConnection() {
 
 function addUser(request, response) {
     let resMsg = {};
-    var dBCon = initiateDBConnection();
-    var body='';
+    const dBCon = initiateDBConnection();
+    let body='';
     request.on('data', function(data){
       body+=data;
     });
@@ -51,11 +52,11 @@ function addUser(request, response) {
 
 function listParts(request, response) {
   let resMsg = {}, sqlStatement;
-  var filter;
+  let filter;
   // detect any filter on the URL line, or just retrieve the full collection
   
   try{
-      var dBCon = initiateDBConnection();
+      const dBCon = initiateDBConnection();
       dBCon.connect(function (err) {
         if (err) throw err; // throws error in case if connection is corrupted/disconnected
 
@@ -77,8 +78,10 @@ function listParts(request, response) {
                 + err.sql + " Textual description : " + err.sqlMessage;
               response.status(503).send(resMsg);
             } else {
-              // Step 1 : Convert databse result set into JSON String Step 2: Parse to actual JSON Step 3: finally convert JSON into JSON String
-              var result_response = JSON.stringify(JSON.parse(JSON.stringify(result)));
+              // Step 1: Convert databse result set into JSON String 
+              // Step 2: Parse to actual JSON 
+              // Step 3: finally convert JSON into JSON String
+              const result_response = JSON.stringify(JSON.parse(JSON.stringify(result)));
               response.set('content-type', 'application/json')
               response.status(200).send(result_response);
               dBCon.end();
@@ -94,8 +97,8 @@ function listParts(request, response) {
 
 function addPart(request, response) {
   let resMsg = {};
-  var dBCon = initiateDBConnection();
-  var body='';
+  const dBCon = initiateDBConnection();
+  let body='';
   request.on('data', function(data){
     body+=data;
   });
@@ -128,6 +131,26 @@ function addPart(request, response) {
   
   return resMsg;
 }
+
+//Generate Builds
+route.post('/generate-pc-build', async function (req, res) {
+  try {
+    let inputDescription = '';
+    req.on('data', function (data) {
+      inputDescription += data;
+    });
+
+    req.on('end', async function () {
+      const buildDescription = JSON.parse(inputDescription).description;
+      const pcBuild = await generatePCBuild(buildDescription);
+
+      res.set('content-type', 'application/json');
+      res.status(200).send({ pcBuild });
+    });
+  } catch (error) {
+    res.status(500).send({ message: 'Error generating PC build', error: error.toString() });
+  }
+});
 
 route.post('/register', function(req, res){
   addUser(req, res);
