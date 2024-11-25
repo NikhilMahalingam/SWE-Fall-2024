@@ -6,12 +6,9 @@ function App() {
     <div className="App">
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
-        <div className={'titleContainer'}>
-          <p>Welcome!</p>
-        </div>
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
+        <h1>Welcome!</h1>
+        <p>Compose beautiful personal computers using our chatbot,</p>
+        <p>prebuilts, or custom-made database of parts.</p>
       </header>
     </div>
   );
