@@ -1,7 +1,10 @@
 const express = require('express');
 const route = express();
 const sql = require("mysql2");
-const { generatePCBuild } = require('./openaiHandler')
+const { generatePCBuild } = require('./apiHandlers/openaiHandler')
+const stripeHandler = require('./apiHandlers/stripeHandler')
+
+
 
 function initiateDBConnection() {
     //Create SQL connection logic
@@ -151,6 +154,24 @@ route.post('/generate-pc-build', async function (req, res) {
     res.status(500).send({ message: 'Error generating PC build', error: error.toString() });
   }
 });
+
+//Handle payments
+route.use('/create-payment-intent', express.json());
+route.post('/create-payment-intent', async (req, res) => {
+  console.log('Request body:', req.body);
+  try {
+    const { amount } = req.body;
+    if (!amount || amount <= 0) {
+      return res.status(400).send('Invalid amount');
+    }
+
+    const paymentIntent = await stripeHandler.createPaymentIntent(amount);
+    res.json({ clientSecret: paymentIntent.client_secret });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 
 route.post('/register', function(req, res){
   addUser(req, res);
