@@ -1,20 +1,16 @@
-import logo from './assets/images/logo.png';
-import './assets/css/App.css';
+import React from 'react';
+import { BrowserRouter as Router } from 'react-router-dom';
+import Navbar from './components/Navbar';
+import AppRoutes from './routes/AppRoutes';
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <div className={'titleContainer'}>
-          <div>Welcome!</div>
-        </div>
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-      </header>
-    </div>
+    <Router>
+      <Navbar />
+      <AppRoutes />
+    </Router>
   );
 }
 
 export default App;
+
