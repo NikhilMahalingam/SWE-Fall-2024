@@ -4,6 +4,8 @@ import logo from './assets/images/logo.png';
 import './assets/css/App.css';
 import Login from './Login';
 import Register from './Register';
+import Navbar from './components/Navbar';
+import AppRoutes from './routes/AppRoutes';
 
 function App() {
   return (

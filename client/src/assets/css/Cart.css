@@ -1,0 +1,15 @@
+.cart-container {
+    padding: 20px;
+    text-align: center;
+  }
+  
+  .cart-container h1 {
+    font-size: 2rem;
+    color: #333;
+  }
+  
+  .cart-container p {
+    font-size: 1.2rem;
+    color: #666;
+  }
+  
