@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate} from 'react-router-dom';
 import logo from './assets/images/logo.png';
-import './assets/css/App.css';
+//import './assets/css/App.css';
 import Login from './Login';
 import Register from './Register';
 import Navbar from './components/Navbar';
@@ -11,10 +11,13 @@ function App() {
   return (
     <Router>
       <div className="App">
-        <Routes>
-          <Route path="/login" element={<Login />} />
+        <Navbar />
+        
+          <AppRoutes />
+          {/* <Route path="/login" element={<Login />} />
           <Route path ="/register" element={<Register />} />
-          <Route path="/" element={<Navigate to="/login" />} />
+          <Route path="/" element={<Navigate to="/login" />} /> */}
+
           {/* <Route path="/" element={
             <header className="App-header">
               <img src={logo} className="App-logo" alt="logo" />
@@ -31,7 +34,7 @@ function App() {
               </a>
             </header>
           } /> */}
-        </Routes>
+        
       </div>
     </Router>
   );
