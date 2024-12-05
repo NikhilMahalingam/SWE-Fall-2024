@@ -1,21 +1,41 @@
 const express = require('express');
 const route = express();
-const sql = require("mysql2");
-const { generatePCBuild } = require('./apiHandlers/openaiHandler')
-const stripeHandler = require('./apiHandlers/stripeHandler')
+const sqlite3 = require('sqlite3').verbose();
+const { generatePCBuild } = require('./apiHandlers/openaiHandler');
+const stripeHandler = require('./apiHandlers/stripeHandler');
+const fs = require('fs');
 
-
+let db = new sqlite3.Database(process.env.Database ?? 'database.db');
 
 function initiateDBConnection() {
     //Create SQL connection logic
-    const connection = sql.createConnection({
-        host: "localhost",
-        user: "root",
-        password: "password",
-        database: "PCComposer"
+    return new Promise((resolve, reject) => {
+      // Initialize the database
+      db = new sqlite3.Database(process.env.Database ?? 'database.db', (err) => {
+        if (err) {
+          return reject(err);
+        }
+  
+        // Read the create table queries
+        fs.readFile("migrations/schema.sql", 'utf8', (err, sql) => {
+          if (err) {
+            return reject(err);
+          }
+  
+          // Execute the SQL
+          db.exec(sql, (err) => {
+            if (err) {
+              return reject(err);
+            }
+            resolve();
+          });
+        });
+      });
     });
-    return connection;
 }
+
+route.use(express.json());
+route.use(express.urlencoded({extended: true}))
 
 function addUser(request, response) {
     let resMsg = {};
@@ -135,6 +155,33 @@ function addPart(request, response) {
   return resMsg;
 }
 
+function getUser(req, res) {
+  const url = new URL(req.url, 'http://${req.headers.host}');
+  const urlParam = url.searchParams.get('user_id');
+  const id = parseInt(urlParam, 10);
+  if (urlParam !== null && (id === undefined || isNaN(id))) {
+    // id is invalid
+    return res.status(400).json({"error": "Invalid 'id' parameter. Must be a number."});
+  }
+  let query = 'SELECT * FROM User_Account';
+  if (urlParam !== null) {
+    // Filter on the id
+    query += ` WHERE user_id = ${id}`;
+  }
+  db.all(query, [], (err, rows) => {
+    if (err) {
+      // Error with server
+      return res.status(500).json({"error": "Internal Server Error."});
+    }
+    if (rows.length === 0) {
+      // User is not found
+      return res.status(404).json({"error": "User not found."});
+    }
+    // Return the user
+    res.status(200).json(rows);
+  });
+}
+
 //Generate Builds
 route.post('/generate-pc-build', async function (req, res) {
   try {
@@ -171,10 +218,14 @@ route.post('/create-payment-intent', async (req, res) => {
   }
 });
 
-
+// User endpoints
 route.post('/register', function(req, res){
   addUser(req, res);
 });
+
+route.get('/users', function(req, res){
+  getUser(req, res);
+})
 
 route.post('/part', function(req, res){
   addPart(req, res);
@@ -184,5 +235,9 @@ route.get('/part', function(req, res) {
   listParts(req, res);
 });
 
+port = 8000;
 
-route.listen(8000);
+// initiateDBConnection();
+route.listen((port), () => {
+  console.log(`Server is listening on port ${port}.`);
+});

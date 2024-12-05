@@ -1,95 +1,97 @@
-CREATE DATABASE IF NOT EXISTS PCComposer;
-USE PCComposer;
-
 CREATE TABLE IF NOT EXISTS User_Account(
-	user_id INT AUTO_INCREMENT PRIMARY KEY,
-	name VARCHAR(100) NOT NULL,
-    password VARCHAR(100) NOT NULL,
-    email VARCHAR(100) NOT NULL,
-    CHECK (email REGEXP '^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'),
-    role ENUM('Admin') NULL
+	user_id INTEGER PRIMARY KEY,
+	name TEXT NOT NULL,
+    password TEXT NOT NULL,
+    email TEXT NOT NULL,
+    isAdmin INTEGER CHECK (isAdmin == 0 || isAdmin == 1)
 );
 
 CREATE TABLE IF NOT EXISTS Computer_Part(
-	part_id INT AUTO_INCREMENT PRIMARY KEY,
-    part_name VARCHAR(100) NOT NULL,
-    brand VARCHAR(100) NOT NULL,
+	part_id INTEGER PRIMARY KEY,
+    part_name TEXT NOT NULL,
+    brand TEXT NOT NULL,
     size FLOAT NOT NULL,
     date_posted DATETIME NOT NULL,
-    unit_price FLOAT NOT NULL
+    unit_price FLOAT NOT NULL,
+    slug TEXT NULL
 );
 
 CREATE TABLE IF NOT EXISTS Cpu(
-	part_id INT PRIMARY KEY,
-    cores INT NOT NULL,
+	part_id INTEGER PRIMARY KEY,
+    cores INTEGER NOT NULL,
     FOREIGN KEY (part_id) REFERENCES Computer_Part(part_id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS Storage_Device(
-	part_id INT PRIMARY KEY,
-    memory INT NOT NULL,
+	part_id INTEGER PRIMARY KEY,
+    memory INTEGER NOT NULL,
     FOREIGN KEY (part_id) REFERENCES Computer_Part(part_id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS Gpu(
-	part_id INT PRIMARY KEY,
-    vram VARCHAR(100) NOT NULL,
+	part_id INTEGER PRIMARY KEY,
+    vram TEXT NOT NULL,
     FOREIGN KEY (part_id) REFERENCES Computer_Part(part_id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS Motherboard(
-	part_id INT PRIMARY KEY,
-    form_factor VARCHAR(100) NOT NULL,
+	part_id INTEGER PRIMARY KEY,
+    form_factor TEXT NOT NULL,
     FOREIGN KEY (part_id) REFERENCES Computer_Part(part_id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS Computer_case(
-	part_id INT PRIMARY KEY,
+	part_id INTEGER PRIMARY KEY,
     size FLOAT NOT NULL,
     FOREIGN KEY (part_id) REFERENCES Computer_Part(part_id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS Cooling(
-	part_id INT PRIMARY KEY,
-    method VARCHAR(100) NOT NULL,
+	part_id INTEGER PRIMARY KEY,
+    method TEXT NOT NULL,
     FOREIGN KEY (part_id) REFERENCES Computer_Part(part_id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS Pre_Build(
-	build_id INT AUTO_INCREMENT PRIMARY KEY,
-    build_name VARCHAR(100) NOT NULL,
+	build_id INTEGER PRIMARY KEY,
+    build_name TEXT NOT NULL,
     build_price FLOAT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS Uses(
-	part_id INT,
-    build_id INT,
+	part_id INTEGER,
+    build_id INTEGER,
     PRIMARY KEY (part_id, build_id),
     FOREIGN KEY (part_id) REFERENCES Computer_Part(part_id) ON DELETE CASCADE,
     FOREIGN KEY (build_id) REFERENCES Pre_Build(build_id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS Parts_Order(
-	order_id INT AUTO_INCREMENT PRIMARY KEY,
+	order_id INTEGER PRIMARY KEY,
     date DATETIME NOT NULL,
-    status ENUM('In Cart', 'Completed') NOT NULL,
-    user_id INT,
+    status TEXT CHECK(status IN ('In Cart', 'Completed', 'Cancelled')) NOT NULL,
+    user_id INTEGER,
     FOREIGN KEY (user_id) REFERENCES User_Account(user_id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS Consists(
-	part_id INT,
-	order_id INT,
-    quantity INT NOT NULL,
+	part_id INTEGER,
+	order_id INTEGER,
+    quantity INTEGER NOT NULL,
     PRIMARY KEY (part_id, order_id),
     FOREIGN KEY (part_id) REFERENCES Computer_Part(part_id) ON DELETE CASCADE,
     FOREIGN KEY (order_id) REFERENCES Parts_Order(order_id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS Favorites(
-	favorite_id INT AUTO_INCREMENT PRIMARY KEY,
+	favorite_id INTEGER PRIMARY KEY,
 	price_max FLOAT,
-    brand VARCHAR(100),
-    user_id INT,
+    brand TEXT,
+    user_id INTEGER,
     FOREIGN KEY (user_id) REFERENCES User_Account(user_id) ON DELETE CASCADE
 );
+
+INSERT INTO User_Account(name, password, email, isAdmin) VALUES('Alice', 'AlicePass', 'alice@example.com', 0);
+INSERT INTO User_Account(name, password, email, isAdmin) VALUES('Bob', 'BobPass', 'bob@example.com', 0);
+INSERT INTO User_Account(name, password, email, isAdmin) VALUES('Charlie', 'CharliePass', 'charlie@example.com', 0);
+INSERT INTO User_Account(name, password, email, isAdmin) VALUES('Admin', 'AdminPass', 'admin@example.com', 1);
