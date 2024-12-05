@@ -4,6 +4,7 @@ import Home from '../Home';
 import Cart from '../Cart';
 import Chatbot from '../Chatbot';
 import Login from '../Login';
+import Register from '../Register';
 
 const AppRoutes = () => {
   return (
@@ -12,6 +13,7 @@ const AppRoutes = () => {
       <Route path="/cart" element={<Cart />} />
       <Route path="/chatbot" element={<Chatbot />} />
       <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
     </Routes>
   );
 };
