@@ -182,6 +182,7 @@ function getUser(req, res) {
   });
 }
 
+//Update user's info
 function putUser(request, response) {
   let resMsg = {};
   const dBCon = initiateDBConnection();
@@ -215,6 +216,7 @@ function putUser(request, response) {
   })
 }
 
+//Delete user from user's end
 function deleteUser(request, response) {
   let resMsg = {};
   const dBCon = initiateDBConnection();
@@ -249,6 +251,7 @@ function deleteUser(request, response) {
   
 }
 
+//user login
 function postLogin(request, response) {
   let resMsg = {};
   const dBCon = initiateDBConnection();
