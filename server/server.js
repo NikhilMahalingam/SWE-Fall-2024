@@ -182,6 +182,130 @@ function getUser(req, res) {
   });
 }
 
+function putUser(request, response) {
+  let resMsg = {};
+  const dBCon = initiateDBConnection();
+  let body='';
+  request.on('data', function(data){
+    body+=data;
+  });
+
+  request.on('end', function () {
+    try{
+      dBCon.connect(function (err) {
+        newInfo = JSON.parse(body);
+        sqlStatement = "UPDATE User_Account SET name = '" + newInfo.name + "', password = '"+ newInfo.password + "', email = '" + newInfo.email +"' WHERE user_id = " + newInfo.user_id;
+        dBCon.query(sqlStatement, function (err, result) {
+          if (err) {
+            resMsg.message = "Service Unavailable";
+            resMsg.body = "MySQL server error: CODE = "
+                + err.code + " SQL of the failed query: "
+                + err.sql + " Textual description : " + err.sqlMessage;
+            response.status(503).send(resMsg);
+          }
+          response.set('content-type', 'application/json')
+          response.status(200).send("Record updated successfully");
+          dBCon.end();
+        });
+      });
+    }
+    catch (ex) {
+      response.status(500).send("Server Error");
+    }
+  })
+}
+
+function deleteUser(request, response) {
+  let resMsg = {};
+  const dBCon = initiateDBConnection();
+  let body='';
+  request.on('data', function(data){
+    body+=data;
+  });
+
+  request.on('end', function () {
+    try{
+      dBCon.connect(function (err) {
+        info = JSON.parse(body);
+        sqlStatement = "DELETE FROM User_Account WHERE id = " + info.user_id;
+        dBCon.query(sqlStatement, function (err, result) {
+          if (err) {
+            resMsg.message = "Service Unavailable";
+            resMsg.body = "MySQL server error: CODE = "
+                + err.code + " SQL of the failed query: "
+                + err.sql + " Textual description : " + err.sqlMessage;
+            response.status(503).send(resMsg);
+          }
+          response.set('content-type', 'application/json')
+          response.status(200).send("Record deleted successfully");
+          dBCon.end();
+        });
+      });
+    }
+    catch (ex) {
+      response.status(500).send("Server Error");
+    }
+  })
+  
+}
+
+function postLogin(request, response) {
+  let resMsg = {};
+  const dBCon = initiateDBConnection();
+  let body='';
+  request.on('data', function(data){
+    body+=data;
+  });
+
+  request.on('end', function () {
+    try{
+      dBCon.connect(function (err) {
+        info = JSON.parse(body);
+
+        if(!info.username || !info.password) {
+          resMsg.message = "Incorrect username or password."; 
+          return response.status(400).send(resMsg);
+        }
+        sqlStatement = "SELECT * FROM User_Account WHERE username = ?";
+        dBCon.query(sqlStatement, [info.username], function (err, result) {
+          if (err) {
+            resMsg.message = "Service Unavailable";
+            resMsg.body = "MySQL server error: CODE = "
+                + err.code + " SQL of the failed query: "
+                + err.sql + " Textual description : " + err.sqlMessage;
+            response.status(503).send(resMsg);
+          }
+
+          //User is not found
+          if(result.length === 0)
+          {
+            resMsg.message = "Incorrect username or password.";
+            return res.status(401).send(resMsg); 
+          }
+
+          //If user is found
+          const user = result[0]; 
+          if(info.password === user.password) {
+            res.status(200).send("Logging in successfully"); 
+          }
+          else {
+            resMsg.message = "Incorrect username or password.";
+            return res.status(401).send(resMsg); 
+          }
+          response.set('content-type', 'application/json')
+          response.status(200).send("Record deleted successfully");
+          dBCon.end();
+        });
+      });
+    }
+    catch (ex) {
+      response.status(500).send("Server Error");
+    }
+  })
+  
+}
+
+
 //Generate Builds
 route.post('/generate-pc-build', async function (req, res) {
   try {
@@ -226,6 +350,19 @@ route.post('/register', function(req, res){
 route.get('/users', function(req, res){
   getUser(req, res);
 })
+
+route.put('/users', function(req, res) {
+  putUser(req, res);
+});
+
+route.delete('/users', function(req, res) {
+  deleteUser(req, res);
+});
+
+route.post('/login', function(req, res) {
+  postLogin(req, res);
+});
+
 
 route.post('/part', function(req, res){
   addPart(req, res);
