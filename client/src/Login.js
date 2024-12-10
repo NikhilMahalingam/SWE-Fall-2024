@@ -1,6 +1,6 @@
 // Login.js
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useLocation, useNavigate, Link } from 'react-router-dom';
 import './assets/css/Login.css';
 
 function Login() {
@@ -23,7 +23,7 @@ function Login() {
       setError(error.message || 'Login failed. Please try again.');
     }
   };
-}
+
 
   return (
     <div className="login-page">
@@ -62,5 +62,5 @@ function Login() {
     </div>
   );
 
-
+}
 export default Login;

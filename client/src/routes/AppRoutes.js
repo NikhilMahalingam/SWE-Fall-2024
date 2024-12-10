@@ -1,11 +1,11 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Home from '../Home';
-import Cart from '../Cart';
-import Chatbot from '../Chatbot';
+import Cart from '../cart';
+import Chatbot from '../chatbot';
 import Login from '../Login';
 import Register from '../Register';
-import ProtectedRoute from './ProtectedRoute'; 
+import ProtectedRoute from '../ProtectedRoutes'; 
 
 const AppRoutes = () => {
   return (
