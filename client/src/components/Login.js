@@ -1,8 +1,8 @@
 // Login.js
 import React, { useState } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
-import { auth, signInWithEmailAndPassword } from '../firebase.js';
-import '../assets/css/Login.css';
+import { auth, signInWithEmailAndPassword } from './auth.js';
+import './assets/css/Login.css';
 
 function Login() {
   const [username, setUsername] = useState(''); 
@@ -20,7 +20,8 @@ function Login() {
     setError('');
 
     try {
-      await signInWithEmailAndPassword(auth, username, password); 
+      await signInWithEmailAndPassword(username, password); 
+      // console.log(auth.currentUser);
       navigate(from, { replace: true }); // Redirect to the intended route
     } catch (error) {
       setError(error.message || 'Login failed. Please try again.');

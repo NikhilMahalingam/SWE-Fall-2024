@@ -1,10 +1,24 @@
-const express = require('express');
+import express from 'express';
 const route = express();
-const sqlite3 = require('sqlite3').verbose();
-const { generatePCBuild } = require('./apiHandlers/openaiHandler');
-const stripeHandler = require('./apiHandlers/stripeHandler');
-const fs = require('fs');
+import sqlite3 from 'sqlite3';
+sqlite3.verbose();
+import { generatePCBuild } from './apiHandlers/openaiHandler.js';
+import stripeHandler from './apiHandlers/stripeHandler.js';
+import 'fs';
+import { initializeApp } from 'firebase/app';
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 
+const firebaseConfig = {
+  apiKey: process.env.FIREBASE_API_KEY,
+  authDomain: process.env.FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.FIREBASE_PROJ_ID,
+  storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.FIREBASE_MESSAGING_ID,
+  appId: process.env.FIREBASE_APP_ID,
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
 let db = new sqlite3.Database(process.env.Database ?? 'database.db');
 
 function initiateDBConnection() {
@@ -35,7 +49,8 @@ function initiateDBConnection() {
 }
 
 route.use(express.json());
-route.use(express.urlencoded({extended: true}))
+route.use(express.urlencoded({extended: true}));
+route.use(express.static("../client/build"));
 
 function addUser(request, response) {
     let resMsg = {};
@@ -220,7 +235,42 @@ route.post('/create-payment-intent', async (req, res) => {
 
 // User endpoints
 route.post('/register', function(req, res){
-  addUser(req, res);
+  // addUser(req, res);
+  if (!req.body || !req.body.email || !req.body.password) {
+    res.status(400).end("Bad email/password");
+    return;
+  }
+  createUserWithEmailAndPassword(auth, req.body.email, req.body.password).then(
+    (result) => {
+      res.status(201).end(JSON.stringify(result));
+    }
+  ).catch(
+    (err) => {
+      res.status(400);
+      if (process.env.DEBUG) res.end(err.toString());
+      else res.end("Failed");
+    }
+  )
+});
+
+route.post('/login', (req, res) => {
+  if (!req.body || !req.body.email || !req.body.password) {
+    res.status(400).end("Bad email/password");
+    return;
+  }
+  console.log(req.body)
+  signInWithEmailAndPassword(auth, req.body.email, req.body.password).then(
+    (result) => {
+      res.status(200).end(JSON.stringify(result));
+    }
+  ).catch(
+    (err) => {
+      res.status(400);
+      if (process.env.DEBUG) res.end(err.toString());
+      else res.end("Failed");
+    }
+  )
+
 });
 
 route.get('/users', function(req, res){
@@ -235,7 +285,7 @@ route.get('/listpart', function(req, res) {
   listParts(req, res);
 });
 
-port = 8000;
+let port = process.env.PORT || 8000;
 
 // initiateDBConnection();
 route.listen((port), () => {

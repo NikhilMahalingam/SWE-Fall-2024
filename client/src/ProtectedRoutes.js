@@ -1,7 +1,7 @@
 // ProtectedRoute.js
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { auth } from './firebase';
+import { auth } from './auth';
 
 const ProtectedRoute = ({ children }) => {
   const user = auth.currentUser; // Check if a user is logged in
