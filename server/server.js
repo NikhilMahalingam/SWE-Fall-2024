@@ -277,11 +277,11 @@ route.get('/users', function(req, res){
   getUser(req, res);
 })
 
-route.post('/part', function(req, res){
+route.post('/addpart', function(req, res){
   addPart(req, res);
 });
 
-route.get('/part', function(req, res) {
+route.get('/listpart', function(req, res) {
   listParts(req, res);
 });
 

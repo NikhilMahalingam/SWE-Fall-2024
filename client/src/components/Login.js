@@ -14,6 +14,8 @@ function Login() {
   const from = location.state?.from?.pathname || '/'; // Get the intended route 
 
   const handleSubmit = async (e) => {
+    console.log(username);
+    console.log(password);
     e.preventDefault();
     setError('');
 
