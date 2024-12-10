@@ -1,8 +1,8 @@
 // Login.js
 import React, { useState } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
-import { auth, signInWithEmailAndPassword } from './firebase.js';
-import './assets/css/Login.css';
+import { auth, signInWithEmailAndPassword } from '../firebase.js';
+import '../assets/css/Login.css';
 
 function Login() {
   const [username, setUsername] = useState(''); 
@@ -14,6 +14,8 @@ function Login() {
   const from = location.state?.from?.pathname || '/'; // Get the intended route 
 
   const handleSubmit = async (e) => {
+    console.log(username);
+    console.log(password);
     e.preventDefault();
     setError('');
 

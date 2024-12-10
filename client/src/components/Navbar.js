@@ -16,6 +16,12 @@ function Navbar() {
           <Link to="/cart" className="navbar-link">Cart</Link>
         </li>
         <li>
+          <Link to="/parts" className="navbar-link">Parts</Link>
+        </li>
+        <li>
+          <Link to="/prebuilts" className="navbar-link">Pre-Builts</Link>
+        </li>
+        <li>
           <Link to="/chatbot" className="navbar-link">Chatbot</Link>
         </li>
         <li>
