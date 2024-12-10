@@ -45,7 +45,7 @@ export let signInWithEmailAndPassword = async (email, password) => {
         email
       })
     }).then((resp) => {
-      console.log(resp.status);
+      // console.log(resp.status);
       if (resp.status >= 400) {
         throw new Error();
       } else if (resp.status === 200) {

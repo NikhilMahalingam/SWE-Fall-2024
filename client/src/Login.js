@@ -19,7 +19,7 @@ function Login() {
 
     try {
       await signInWithEmailAndPassword(username, password); 
-      console.log(auth.currentUser);
+      // console.log(auth.currentUser);
       navigate(from, { replace: true }); // Redirect to the intended route
     } catch (error) {
       setError(error.message || 'Login failed. Please try again.');
