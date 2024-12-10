@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
-import { auth, createUserWithEmailAndPassword } from './firebase';
+import { createUserWithEmailAndPassword } from './auth';
 import './assets/css/Register.css';
 
 function Register() {
@@ -18,7 +18,7 @@ function Register() {
       return;
     }
     try {
-      await createUserWithEmailAndPassword(auth, username, password);
+      await createUserWithEmailAndPassword(username, password);
       alert('Account created successfully');
       navigate('/login');
     } catch (error) {
