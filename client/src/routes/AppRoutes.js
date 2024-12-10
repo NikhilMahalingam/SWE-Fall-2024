@@ -5,15 +5,19 @@ import Cart from '../Cart';
 import Chatbot from '../Chatbot';
 import Login from '../Login';
 import Register from '../Register';
+import ProtectedRoute from './ProtectedRoute'; 
 
 const AppRoutes = () => {
   return (
     <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/cart" element={<Cart />} />
-      <Route path="/chatbot" element={<Chatbot />} />
+      {/* Public Routes */}
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+
+      {/* Protected Routes */}
+      <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+      <Route path="/cart" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
+      <Route path="/chatbot" element={<ProtectedRoute><Chatbot /></ProtectedRoute>} />
     </Routes>
   );
 };

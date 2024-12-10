@@ -7,10 +7,19 @@ function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle login logic here
+    setError('');
+
+    try {
+      await signInWithEmailAndPassword(auth, username, password);
+      alert('Login successful!');
+      navigate('/home'); 
+    } catch (error) {
+      setError(error.message || 'Login failed. Please try again.');
+    }
   };
+}
 
   return (
     <div className="login-page">
@@ -48,6 +57,6 @@ function Login() {
       </div>
     </div>
   );
-}
+
 
 export default Login;
