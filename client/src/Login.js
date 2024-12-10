@@ -4,17 +4,21 @@ import { Link } from 'react-router-dom';
 import './assets/css/Login.css';
 
 function Login() {
-  const [username, setUsername] = useState('');
+  const [username, setUsername] = useState(''); 
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const from = location.state?.from?.pathname || '/'; // Get the intended route 
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
     try {
-      await signInWithEmailAndPassword(auth, username, password);
-      alert('Login successful!');
-      navigate('/home'); 
+      await signInWithEmailAndPassword(auth, username, password); 
+      navigate(from, { replace: true }); // Redirect to the intended route
     } catch (error) {
       setError(error.message || 'Login failed. Please try again.');
     }
