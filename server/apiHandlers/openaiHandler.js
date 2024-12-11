@@ -10,7 +10,7 @@ export async function generatePCBuild(inputDescription) {
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
-        { role: 'system', content: 'You are a helpful assistant that creates PC builds based on user descriptions in JSON format.' },
+        { role: 'system', content: 'You are a helpful assistant that generates PC builds. Always respond in JSON format without any markdown fences.'},
         { role: 'user', content: `Generate a PC build with a CPU, Storage_Device, GPU, Motherboard, Computer_case, and Cooling component based on the following requirement: ${inputDescription}. Give only the model name and brand for all components.` },
       ],
     });
