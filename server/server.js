@@ -252,61 +252,61 @@ function deleteUser(request, response) {
 }
 
 //user login
-function postLogin(request, response) {
-  let resMsg = {};
-  const dBCon = initiateDBConnection();
-  let body='';
-  request.on('data', function(data){
-    body+=data;
-  });
+// function postLogin(request, response) {
+//   let resMsg = {};
+//   const dBCon = initiateDBConnection();
+//   let body='';
+//   request.on('data', function(data){
+//     body+=data;
+//   });
 
-  request.on('end', function () {
-    try{
-      dBCon.connect(function (err) {
-        info = JSON.parse(body);
+//   request.on('end', function () {
+//     try{
+//       dBCon.connect(function (err) {
+//         info = JSON.parse(body);
 
-        if(!info.username || !info.password) {
-          resMsg.message = "Incorrect username or password."; 
-          return response.status(400).send(resMsg);
-        }
-        sqlStatement = "SELECT * FROM User_Account WHERE username = ?";
-        dBCon.query(sqlStatement, [info.username], function (err, result) {
-          if (err) {
-            resMsg.message = "Service Unavailable";
-            resMsg.body = "MySQL server error: CODE = "
-                + err.code + " SQL of the failed query: "
-                + err.sql + " Textual description : " + err.sqlMessage;
-            response.status(503).send(resMsg);
-          }
+//         if(!info.username || !info.password) {
+//           resMsg.message = "Incorrect username or password."; 
+//           return response.status(400).send(resMsg);
+//         }
+//         sqlStatement = "SELECT * FROM User_Account WHERE username = ?";
+//         dBCon.query(sqlStatement, [info.username], function (err, result) {
+//           if (err) {
+//             resMsg.message = "Service Unavailable";
+//             resMsg.body = "MySQL server error: CODE = "
+//                 + err.code + " SQL of the failed query: "
+//                 + err.sql + " Textual description : " + err.sqlMessage;
+//             response.status(503).send(resMsg);
+//           }
 
-          //User is not found
-          if(result.length === 0)
-          {
-            resMsg.message = "Incorrect username or password.";
-            return res.status(401).send(resMsg); 
-          }
+//           //User is not found
+//           if(result.length === 0)
+//           {
+//             resMsg.message = "Incorrect username or password.";
+//             return res.status(401).send(resMsg); 
+//           }
 
-          //If user is found
-          const user = result[0]; 
-          if(info.password === user.password) {
-            res.status(200).send("Logging in successfully"); 
-          }
-          else {
-            resMsg.message = "Incorrect username or password.";
-            return res.status(401).send(resMsg); 
-          }
-          response.set('content-type', 'application/json')
-          response.status(200).send("Record deleted successfully");
-          dBCon.end();
-        });
-      });
-    }
-    catch (ex) {
-      response.status(500).send("Server Error");
-    }
-  })
+//           //If user is found
+//           const user = result[0]; 
+//           if(info.password === user.password) {
+//             res.status(200).send("Logging in successfully"); 
+//           }
+//           else {
+//             resMsg.message = "Incorrect username or password.";
+//             return res.status(401).send(resMsg); 
+//           }
+//           response.set('content-type', 'application/json')
+//           response.status(200).send("Record deleted successfully");
+//           dBCon.end();
+//         });
+//       });
+//     }
+//     catch (ex) {
+//       response.status(500).send("Server Error");
+//     }
+//   })
   
-}
+// }
 
 
 //Generate Builds
@@ -362,9 +362,9 @@ route.delete('/users', function(req, res) {
   deleteUser(req, res);
 });
 
-route.post('/login', function(req, res) {
-  postLogin(req, res);
-});
+// route.post('/login', function(req, res) {
+//   postLogin(req, res);
+// });
 
 
 route.post('/part', function(req, res){
