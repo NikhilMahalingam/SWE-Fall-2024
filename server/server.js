@@ -6,6 +6,7 @@ import { createPaymentIntent } from './apiHandlers/stripeHandler.js';
 import 'dotenv/config';
 import { initializeApp } from 'firebase/app';
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
+import cors from 'cors';
 
 // Firebase Configuration
 const firebaseConfig = {
@@ -22,8 +23,10 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
 const route = express();
+route.use(cors());
 sqlite3.verbose();
 let db = new sqlite3.Database(process.env.Database ?? 'database.db');
+console.log("Using database file:", process.env.Database ?? 'database.db');
 
 // Function to initiate the SQLite database connection
 function initiateDBConnection() {
@@ -117,3 +120,18 @@ const port = process.env.PORT || 8000;
 route.listen(port, () => {
   console.log(`Server is listening on port ${port}.`);
 });
+
+route.get('/listpart', (req, res) => {
+  try {
+    db.all("SELECT * FROM Computer_Part", [], (err, rows) => {
+      if (err) {
+        res.status(500).json({ error: "Database error", details: err.message });
+        return;
+      }
+      res.status(200).json(rows);
+    });
+  } catch (error) {
+    res.status(500).json({ error: "Server error", details: error.message });
+  }
+});
+

@@ -7,7 +7,6 @@ import Prebuilts from './Prebuilts';
 import Chatbot from './Chatbot';
 import Login from '../components/Login';
 import Register from '../components/Register';
-import ProtectedRoute from '../ProtectedRoutes'; 
 
 const AppRoutes = () => {
   return (
@@ -17,11 +16,11 @@ const AppRoutes = () => {
       <Route path="/register" element={<Register />} />
 
       {/* Protected Routes */}
-      <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
-      <Route path="/cart" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
-      <Route path="/parts" element={<ProtectedRoute><Parts /></ProtectedRoute>} />
-      <Route path="/prebuilts" element={<ProtectedRoute><Prebuilts /></ProtectedRoute>} />
-      <Route path="/chatbot" element={<ProtectedRoute><Chatbot /></ProtectedRoute>} />
+      <Route path="/" element={<Home />} />
+      <Route path="/cart" element={<Cart />} />
+      <Route path="/parts" element={<Parts />} />
+      <Route path="/prebuilts" element={<Prebuilts />} />
+      <Route path="/chatbot" element={<Chatbot />} />
     </Routes>
   );
 };
