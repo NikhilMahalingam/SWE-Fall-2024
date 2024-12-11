@@ -1,11 +1,11 @@
-require('dotenv').config();
-const OpenAI = require('openai');
+import 'dotenv/config';
+import OpenAI from 'openai';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-async function generatePCBuild(inputDescription) {
+export async function generatePCBuild(inputDescription) {
   try {
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
@@ -15,13 +15,9 @@ async function generatePCBuild(inputDescription) {
       ],
     });
 
-    return completion.choices[0].message.content;  // Generated response
+    return completion.choices[0].message.content; // Generated response
   } catch (error) {
     console.error('Error generating PC build:', error);
     throw error;
   }
 }
-
-module.exports = {
-    generatePCBuild,
-  };
