@@ -1,6 +1,22 @@
-export async function listParts() {
-  try {
-    const response = await fetch("http://localhost:8000/listpart");
+// export async function listParts() {
+//   try {
+//     const response = await fetch("http://localhost:8000/listpart");
+//     if (!response.ok) {
+//       throw new Error(`HTTP error! Status: ${response.status}`);
+//     }
+//     return await response.json();
+//   } catch (error) {
+//     console.error("Error fetching parts:", error.message);
+//     throw error;
+//   }
+// }
+
+export async function listPart(componentType) {
+  try 
+  {
+    const url = `http://localhost:8000/listpart/components?componentType=${componentType}`; 
+    const response = await fetch(url);
+    console.log('Fetching rows from: ', url);
     if (!response.ok) {
       throw new Error(`HTTP error! Status: ${response.status}`);
     }
@@ -10,6 +26,8 @@ export async function listParts() {
     throw error;
   }
 }
+
+
 
 export async function listPreBuilts() {
   try {
