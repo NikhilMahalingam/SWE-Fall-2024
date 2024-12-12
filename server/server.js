@@ -123,7 +123,7 @@ route.listen(port, () => {
 
 route.get('/listpart', (req, res) => {
   try {
-    db.all("SELECT * FROM Computer_Part", [], (err, rows) => {
+    db.all("SELECT part_name, brand, unit_price, slug FROM Computer_Part", [], (err, rows) => {
       if (err) {
         res.status(500).json({ error: "Database error", details: err.message });
         return;
@@ -134,4 +134,5 @@ route.get('/listpart', (req, res) => {
     res.status(500).json({ error: "Server error", details: error.message });
   }
 });
+
 

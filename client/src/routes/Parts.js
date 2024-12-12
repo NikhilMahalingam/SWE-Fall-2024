@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { listParts } from '../api';
+import '../assets/css/Parts.css';
 
 const Parts = () => {
   const [parts, setParts] = useState([]);
@@ -19,14 +20,28 @@ const Parts = () => {
     fetchParts();
   }, []);
 
+  const getAWSImageURL = (slug) => {
+    const baseURL = 'https://pccomposer.s3.amazonaws.com/';
+    return `${baseURL}${slug}.jpg`;
+  };
+
   return (
-    <div>
-      <h1>Parts List</h1>
+    <div className="parts-container">
+      <h1 className="parts-title">Parts List</h1>
       {error && <p style={{ color: 'red' }}>{error}</p>}
-      <ul>
+      <ul className="parts-list">
         {parts.map((part, index) => (
-          <li key={index}>
-            <strong>{part.part_name}</strong> - {part.brand} (${part.unit_price})
+          <li key={index} className="part-item">
+            <img
+              src={getAWSImageURL(part.slug)}
+              alt={part.part_name}
+              className="part-image"
+            />
+            <div className="part-details">
+              <div className="part-name">{part.part_name}</div>
+              <div className="part-brand">{part.brand}</div>
+              <div className="part-price">${part.unit_price}</div>
+            </div>
           </li>
         ))}
       </ul>
