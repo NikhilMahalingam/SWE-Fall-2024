@@ -47,10 +47,12 @@ export let signInWithEmailAndPassword = async (email, password) => {
     }).then((resp) => {
       // console.log(resp.status);
       if (resp.status >= 400) {
-        throw new Error();
+        throw new Error(resp.json().error);
       } else if (resp.status === 200) {
-        resp.json().then((obj) => {auth.currentUser = obj.user;});
+        return resp.json().then((obj) => obj.user);
         // auth.currentUser = body.user;
+      } else {
+        throw new Error("WHAT THE FUCK");
       }
     });
 }

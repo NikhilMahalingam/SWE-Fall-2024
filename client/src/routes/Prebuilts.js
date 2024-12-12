@@ -2,7 +2,7 @@ import React, {useState, useEffect} from 'react';
 import { listPreBuilts } from '../api';
 import '../assets/css/Prebuilts.css';
 
-const Prebuilts = () => {
+const Prebuilts = ({ cart, onCartChange }) => {
   const [prebuilts, setPrebuilts] = useState([]);
   const [error, setError] = useState(null);
 

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { listParts } from '../api';
 import '../assets/css/Parts.css';
 
-const Parts = () => {
+const Parts = ({ cart, onCartChange }) => {
   const [parts, setParts] = useState([]);
   const [error, setError] = useState(null);
 

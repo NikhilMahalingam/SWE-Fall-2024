@@ -28,7 +28,7 @@ import CheckoutForm from '../components/CheckoutForm.js';
 
 const stripePromise = loadStripe("pk_test_51QOp2lDkIHmUkoEWbRxZrQrnRrdDlmUgNUt5LcZwqLXXnphXDLgE4xEFFWMheq8Mej7I862M9vUGU4cvzke43Ako00SvDsCa1t");
 
-function Cart() {
+function Cart({ cart, onCartChange }) {
   const [showCheckout, setShowCheckout] = useState(false);
 
   const handleCheckoutClick = () => {

@@ -5,6 +5,7 @@ import { generatePCBuild } from './apiHandlers/openaiHandler.js';
 import { createPaymentIntent } from './apiHandlers/stripeHandler.js';
 import 'dotenv/config';
 import cors from 'cors';
+import path from 'path';
 
 
 const route = express();
@@ -96,8 +97,9 @@ route.post('/login', async (req, res) => {
 
   try {
     db.get("SELECT * FROM User_Account WHERE name = $email AND password = $password;", {$email: email, $password: password}, (err, row) => {
-      if (err) throw err;
-      res.status(201).json({user: row});
+      if (err) res.status(400).json({ error: process.env.DEBUG ? err.toString() : 'Failed' });
+      else if (!row) res.status(400).json({ error: process.env.DEBUG ? "No such username/password" : 'Failed' });
+      else res.status(200).json({user: row});
     });
   } catch (err) {
     res.status(400).json({ error: process.env.DEBUG ? err.toString() : 'Failed' });
@@ -137,4 +139,6 @@ route.get('/listprebuilt', (req, res) => {
     res.status(500).json({ error: "Server error", details: error.message });
   }
 });
-
+route.get("*", (req, res)=> {
+  res.sendFile(path.resolve('..', 'client', 'build', 'index.html'));
+});
