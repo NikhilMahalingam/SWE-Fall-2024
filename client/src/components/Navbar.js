@@ -7,11 +7,12 @@ function Navbar() {
   return (
     <nav className="navbar">
       <div className="navbar-brand">
-        <Link to="/">
           <img src={logo} alt="App Logo" className="navbar-logo" />
-        </Link>
       </div>
       <ul className="navbar-links">
+        <li>
+          <Link to="/" className="navbar-link">Home</Link>
+        </li>
         <li>
           <Link to="/parts" className="navbar-link">Parts</Link>
         </li>
