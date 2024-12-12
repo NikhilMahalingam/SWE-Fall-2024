@@ -1,12 +1,12 @@
-import logo from '../assets/images/logo.png';
+import logo from '../assets/images/logo_transparent.png';
 import '../assets/css/Home.css';
 
-function App() {
+function Home() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <h1>Welcome!</h1>
+    <div className="Home">
+      <header className="Home-header">
+        <img src={logo} className="Home-logo" alt="logo" />
+        <h1>Welcome to PC Composer!</h1>
         <p>Compose beautiful personal computers using our chatbot,</p>
         <p>prebuilts, or custom-made database of parts.</p>
       </header>
@@ -14,4 +14,4 @@ function App() {
   );
 }
 
-export default App;
+export default Home;
