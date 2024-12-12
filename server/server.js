@@ -4,23 +4,8 @@ import fs from 'fs';
 import { generatePCBuild } from './apiHandlers/openaiHandler.js';
 import { createPaymentIntent } from './apiHandlers/stripeHandler.js';
 import 'dotenv/config';
-import { initializeApp } from 'firebase/app';
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import cors from 'cors';
 
-// Firebase Configuration
-const firebaseConfig = {
-  apiKey: process.env.FIREBASE_API_KEY,
-  authDomain: process.env.FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.FIREBASE_PROJ_ID,
-  storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.FIREBASE_MESSAGING_ID,
-  appId: process.env.FIREBASE_APP_ID,
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
 
 const route = express();
 route.use(cors());
@@ -92,8 +77,10 @@ route.post('/register', async (req, res) => {
   }
 
   try {
-    const result = await createUserWithEmailAndPassword(auth, email, password);
-    res.status(201).json(result);
+    db.run("INSERT INTO User_Account (name, password, email, isAdmin) VALUES ($email, $password, $email, 0);", {$email: email, $password: password}, function (err) {
+      if (err) throw err;
+      res.status(201).json({id: this.lastID});
+    });
   } catch (err) {
     res.status(400).json({ error: process.env.DEBUG ? err.toString() : 'Failed' });
   }
@@ -108,8 +95,10 @@ route.post('/login', async (req, res) => {
   }
 
   try {
-    const result = await signInWithEmailAndPassword(auth, email, password);
-    res.status(200).json(result);
+    db.get("SELECT * FROM User_Account WHERE name = $email AND password = $password;", {$email: email, $password: password}, (err, row) => {
+      if (err) throw err;
+      res.status(201).json({user: row});
+    });
   } catch (err) {
     res.status(400).json({ error: process.env.DEBUG ? err.toString() : 'Failed' });
   }
