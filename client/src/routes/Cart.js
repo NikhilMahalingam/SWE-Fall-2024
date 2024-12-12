@@ -1,4 +1,4 @@
-import {Elements} from '@stripe/react-stripe-js';
+/*import {Elements} from '@stripe/react-stripe-js';
 import {loadStripe} from '@stripe/stripe-js';
 import CheckoutForm from '../components/CheckoutForm.js';
 
@@ -19,9 +19,9 @@ export default function Cart() {
   );
 };
 
+*/
 
-
-/*import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import CheckoutForm from '../components/CheckoutForm.js';
@@ -50,4 +50,4 @@ function Cart() {
 }
 
 export default Cart;
-*/
+

@@ -18,7 +18,7 @@ const CheckoutForm = () => {
     setIsProcessing(true);
 
     try {
-      // Call your backend to create a PaymentIntent
+  
       const response = await fetch('http://localhost:8000/create-payment-intent', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -26,8 +26,6 @@ const CheckoutForm = () => {
       });
 
       const { clientSecret } = await response.json();
-
-      // Confirm the payment with the client secret
       const result = await stripe.confirmCardPayment(clientSecret, {
         payment_method: {
           card: elements.getElement(CardElement),
