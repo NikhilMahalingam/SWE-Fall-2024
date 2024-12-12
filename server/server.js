@@ -5,6 +5,7 @@ import { generatePCBuild } from './apiHandlers/openaiHandler.js';
 import { createPaymentIntent } from './apiHandlers/stripeHandler.js';
 import 'dotenv/config';
 import cors from 'cors';
+import path from 'path';
 
 
 const route = express();
@@ -97,7 +98,9 @@ route.post('/login', async (req, res) => {
   try {
     db.get("SELECT * FROM User_Account WHERE name = $email AND password = $password;", {$email: email, $password: password}, (err, row) => {
       if (err) throw err;
-      res.status(201).json({user: row});
+      console.log(row);
+      if (!row) throw Error("no such username/password combination");
+      res.status(200).json({user: row});
     });
   } catch (err) {
     res.status(400).json({ error: process.env.DEBUG ? err.toString() : 'Failed' });
@@ -124,4 +127,6 @@ route.get('/listpart', (req, res) => {
   }
 });
 
-
+route.get("*", (req, res)=> {
+  res.sendFile(path.resolve('..', 'client', 'build', 'index.html'));
+});

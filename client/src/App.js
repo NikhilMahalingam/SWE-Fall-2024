@@ -1,4 +1,4 @@
-import React from 'react';
+import { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate} from 'react-router-dom';
 
 import logo from './assets/images/logo_transparent.png';
@@ -9,12 +9,15 @@ import Navbar from './components/Navbar';
 import AppRoutes from './routes/AppRoutes';
 
 function App() {
+  let [cart, setCart] = useState([]);
+  let [user, setUser] = useState(null);
+
   return (
     <Router>
       <div className="App">
-        <Navbar />
+        <Navbar user={user}/>
         
-          <AppRoutes />
+          <AppRoutes cart={cart} user={user} onUserChange={setUser} onCartChange={setCart} />
           {/* <Route path="/login" element={<Login />} />
           <Route path ="/register" element={<Register />} />
           <Route path="/" element={<Navigate to="/login" />} /> */}

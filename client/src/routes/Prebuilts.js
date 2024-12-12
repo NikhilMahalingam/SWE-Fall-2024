@@ -1,6 +1,6 @@
 import React from 'react'
 
-const Prebuilts = () => {
+const Prebuilts = ({ cart, onCartChange }) => {
   return (
     <div>Prebuilts</div>
   )
