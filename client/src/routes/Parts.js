@@ -25,6 +25,10 @@ const Parts = () => {
     return `${baseURL}${slug}.jpg`;
   };
 
+  const handleBuyClick = (part) => {
+    console.log(`Adding ${part.part_name} to the cart.`);
+  };
+
   return (
     <div className="parts-container">
       <h1 className="parts-title">Parts List</h1>
@@ -41,6 +45,11 @@ const Parts = () => {
               <div className="part-name">{part.part_name}</div>
               <div className="part-brand">{part.brand}</div>
               <div className="part-price">${part.unit_price}</div>
+              <button 
+                className="buy-button" 
+                onClick={() => handleBuyClick(part)}>
+                Buy
+              </button>
             </div>
           </li>
         ))}
