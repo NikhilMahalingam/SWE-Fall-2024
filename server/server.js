@@ -124,4 +124,17 @@ route.get('/listpart', (req, res) => {
   }
 });
 
+route.get('/listprebuilt', (req, res) => {
+  try {
+    db.all("SELECT build_name, build_price FROM Pre_Build", [], (err, rows) => {
+      if (err) {
+        res.status(500).json({ error: "Database error", details: err.message });
+        return;
+      }
+      res.status(200).json(rows);
+    });
+  } catch (error) {
+    res.status(500).json({ error: "Server error", details: error.message });
+  }
+});
 
