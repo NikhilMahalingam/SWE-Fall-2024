@@ -1,188 +1,144 @@
-const express = require('express');
+import express from 'express';
+import sqlite3 from 'sqlite3';
+import fs from 'fs';
+import { generatePCBuild } from './apiHandlers/openaiHandler.js';
+import { createPaymentIntent } from './apiHandlers/stripeHandler.js';
+import 'dotenv/config';
+import cors from 'cors';
+import path from 'path';
+
+
 const route = express();
-const sql = require("mysql2");
-const { generatePCBuild } = require('./apiHandlers/openaiHandler')
-const stripeHandler = require('./apiHandlers/stripeHandler')
+route.use(cors());
+sqlite3.verbose();
+let db = new sqlite3.Database(process.env.Database ?? 'database.db');
+console.log("Using database file:", process.env.Database ?? 'database.db');
 
-
-
+// Function to initiate the SQLite database connection
 function initiateDBConnection() {
-    //Create SQL connection logic
-    const connection = sql.createConnection({
-        host: "localhost",
-        user: "root",
-        password: "password",
-        database: "PCComposer"
-    });
-    return connection;
-}
+  return new Promise((resolve, reject) => {
+    db = new sqlite3.Database(process.env.Database ?? 'database.db', (err) => {
+      if (err) {
+        return reject(err);
+      }
 
-function addUser(request, response) {
-    let resMsg = {};
-    const dBCon = initiateDBConnection();
-    let body='';
-    request.on('data', function(data){
-      body+=data;
-    });
-
-    request.on('end', function () {
-        try{
-          dBCon.connect(function (err) {
-            newUser = JSON.parse(body);
-            sqlStatement = "INSERT INTO User_Account(name, password, email) VALUES ('" + newUser.name + "','"+ newUser.password + "','" + newUser.email+"')";
-            dBCon.query(sqlStatement, function (err, result) {
-              if (err) {
-                resMsg.message = "Service Unavailable";
-                resMsg.body = "MySQL server error: CODE = "
-                    + err.code + " SQL of the failed query: "
-                    + err.sql + " Textual description : " + err.sqlMessage;
-                response.status(503).send(resMsg);
-              }
-              response.set('content-type', 'application/json')
-              response.status(200).send("Record inserted successfully");
-              dBCon.end();
-            });
-          });
-        }
-        catch (ex) {
-          response.status(500).send("Server Error");
-        }
-      });
-    
-    
-    return resMsg;
-}
-
-function listParts(request, response) {
-  let resMsg = {}, sqlStatement;
-  let filter;
-  // detect any filter on the URL line, or just retrieve the full collection
-  
-  try{
-      const dBCon = initiateDBConnection();
-      dBCon.connect(function (err) {
-        if (err) throw err; // throws error in case if connection is corrupted/disconnected
-
-        query = request.url.split('?');
-        if (query[1] !== undefined) {
-          // parse URL query to a collection of <key, value> pairs:
-          filters = query[1].split("=");
-          //filters get split on "=" as product_id(Category) = 1 (Value)
-          sqlStatement = "SELECT * FROM Computer_Part WHERE " + filters[0]+"='"+filters[1]+"'";
-        } else {
-          sqlStatement = "SELECT * FROM Computer_Part;";
+      fs.readFile("migrations/schema.sql", 'utf8', (err, sql) => {
+        if (err) {
+          return reject(err);
         }
 
-        dBCon.query(sqlStatement, function (err, result) {
-            if (err) {
-              resMsg.message = "Service Unavailable";
-              resMsg.body = "MySQL server error: CODE = "
-                + err.code + " SQL of the failed query: "
-                + err.sql + " Textual description : " + err.sqlMessage;
-              response.status(503).send(resMsg);
-            } else {
-              // Step 1: Convert databse result set into JSON String 
-              // Step 2: Parse to actual JSON 
-              // Step 3: finally convert JSON into JSON String
-              const result_response = JSON.stringify(JSON.parse(JSON.stringify(result)));
-              response.set('content-type', 'application/json')
-              response.status(200).send(result_response);
-              dBCon.end();
-            }
-          });
-    });
-  }
-  catch(err) {
-    response.status(200).send(result_response);
-  }
-  
-}
-
-function addPart(request, response) {
-  let resMsg = {};
-  const dBCon = initiateDBConnection();
-  let body='';
-  request.on('data', function(data){
-    body+=data;
-  });
-
-  request.on('end', function () {
-      try{
-        dBCon.connect(function (err) {
-          newPart = JSON.parse(body);
-          sqlStatement = "INSERT INTO Computer_Part(part_name, brand, size, date_posted, unit_price) VALUES ('" + newPart.partName + "','"+ 
-            newPart.brand + "'," + newPart.size + ",'" + newPart.dateTime + "'," + newPart.unitPrice + ")";
-          dBCon.query(sqlStatement, function (err, result) {
-            if (err) {
-              resMsg.message = "Service Unavailable";
-              resMsg.body = "MySQL server error: CODE = "
-                  + err.code + " SQL of the failed query: "
-                  + err.sql + " Textual description : " + err.sqlMessage;
-              response.status(503).send(resMsg);
-            }
-            response.set('content-type', 'application/json')
-            response.status(200).send("Record inserted successfully");
-            dBCon.end();
-          });
+        db.exec(sql, (err) => {
+          if (err) {
+            return reject(err);
+          }
+          resolve();
         });
-      }
-      catch (ex) {
-        response.status(500).send("Server Error");
-      }
+      });
     });
-  
-  
-  return resMsg;
+  });
 }
 
-//Generate Builds
-route.post('/generate-pc-build', async function (req, res) {
+// Middleware
+route.use(express.json());
+route.use(express.urlencoded({ extended: true }));
+route.use(express.static("../client/build"));
+
+// Routes
+route.post('/generate-pc-build', async (req, res) => {
   try {
-    let inputDescription = '';
-    req.on('data', function (data) {
-      inputDescription += data;
-    });
-
-    req.on('end', async function () {
-      const buildDescription = JSON.parse(inputDescription).description;
-      const pcBuild = await generatePCBuild(buildDescription);
-
-      res.set('content-type', 'application/json');
-      res.status(200).send({ pcBuild });
-    });
+    const { description } = req.body;
+    const pcBuild = await generatePCBuild(description);
+    res.status(200).json({ pcBuild });
   } catch (error) {
-    res.status(500).send({ message: 'Error generating PC build', error: error.toString() });
+    res.status(500).json({ message: 'Error generating PC build', error: error.toString() });
   }
 });
 
-//Handle payments
-route.use('/create-payment-intent', express.json());
 route.post('/create-payment-intent', async (req, res) => {
-  console.log('Request body:', req.body);
-  try {
-    if (!amount || amount <= 0) {
-      return res.status(400).send('Invalid amount');
-    }
+  const { amount } = req.body;
 
-    const paymentIntent = await stripeHandler.createPaymentIntent(amount);
+  if (!amount || amount <= 0) {
+    return res.status(400).json({ error: 'Invalid amount' });
+  }
+
+  try {
+    const paymentIntent = await createPaymentIntent(amount);
     res.json({ clientSecret: paymentIntent.client_secret });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
+route.post('/register', async (req, res) => {
+  const { name, email, password } = req.body;
 
-route.post('/register', function(req, res){
-  addUser(req, res);
+  if (!name || !email || !password) {
+    res.status(400).json({ error: 'Bad email/password' });
+    return;
+  }
+
+  try {
+    db.run("INSERT INTO User_Account (name, password, email, isAdmin) VALUES ($name, $password, $email, 0);", {$name: name, $email: email, $password: password}, function (err) {
+      if (err) throw err;
+      res.status(201).json({id: this.lastID});
+    });
+  } catch (err) {
+    res.status(400).json({ error: process.env.DEBUG ? err.toString() : 'Failed' });
+  }
 });
 
-route.post('/part', function(req, res){
-  addPart(req, res);
+route.post('/login', async (req, res) => {
+  const {email, password } = req.body;
+
+  if (!email || !password) {
+    res.status(400).json({ error: 'Bad email/password' });
+    return;
+  }
+
+  try {
+    db.get("SELECT * FROM User_Account WHERE email = $email AND password = $password;", {$email: email, $password: password}, (err, row) => {
+      if (err) res.status(400).json({ error: process.env.DEBUG ? err.toString() : 'Failed' });
+      else if (!row) res.status(400).json({ error: process.env.DEBUG ? "No such username/password" : 'Failed' });
+      else res.status(200).json({user: row});
+    });
+  } catch (err) {
+    res.status(400).json({ error: process.env.DEBUG ? err.toString() : 'Failed' });
+  }
 });
 
-route.get('/part', function(req, res) {
-  listParts(req, res);
+// Start the server
+const port = process.env.PORT || 8000;
+route.listen(port, () => {
+  console.log(`Server is listening on port ${port}.`);
 });
 
+route.get('/listpart', (req, res) => {
+  try {
+    db.all("SELECT part_name, brand, unit_price, slug FROM Computer_Part", [], (err, rows) => {
+      if (err) {
+        res.status(500).json({ error: "Database error", details: err.message });
+        return;
+      }
+      res.status(200).json(rows);
+    });
+  } catch (error) {
+    res.status(500).json({ error: "Server error", details: error.message });
+  }
+});
 
-route.listen(8000);
+route.get('/listprebuilt', (req, res) => {
+  try {
+    db.all("SELECT build_name, build_price FROM Pre_Build", [], (err, rows) => {
+      if (err) {
+        res.status(500).json({ error: "Database error", details: err.message });
+        return;
+      }
+      res.status(200).json(rows);
+    });
+  } catch (error) {
+    res.status(500).json({ error: "Server error", details: error.message });
+  }
+});
+route.get("*", (req, res)=> {
+  res.sendFile(path.resolve('..', 'client', 'build', 'index.html'));
+});

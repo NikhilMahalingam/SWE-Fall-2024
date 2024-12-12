@@ -1,5 +1,7 @@
-require('dotenv').config();
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+import 'dotenv/config';
+import Stripe from 'stripe';
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 async function createPaymentIntent(amount) {
   try {
@@ -16,6 +18,5 @@ async function createPaymentIntent(amount) {
   }
 }
 
-module.exports = {
-  createPaymentIntent,
-};
+export { createPaymentIntent }; 
+export default { createPaymentIntent }; 

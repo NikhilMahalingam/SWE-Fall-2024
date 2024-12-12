@@ -1,16 +1,32 @@
 // Login.js
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import './assets/css/Login.css';
+import { useLocation, useNavigate, Link } from 'react-router-dom';
+import { auth, signInWithEmailAndPassword } from '../auth.js';
+import '../assets/css/Login.css';
 
-function Login() {
-  const [username, setUsername] = useState('');
+function Login({user, onUserChange}) {
+  const [username, setUsername] = useState(''); 
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  const handleSubmit = (e) => {
+  const from = location.state?.from?.pathname || '/'; // Get the intended route 
+
+  const handleSubmit = async (e) => {
+    console.log(username);
+    console.log(password);
     e.preventDefault();
-    // Handle login logic here
+    setError('');
+
+    try {
+      onUserChange(await signInWithEmailAndPassword(username, password)); 
+      navigate(from, { replace: true }); // Redirect to the intended route
+    } catch (error) {
+      setError(error.message || 'Login failed. Please try again.');
+    }
   };
+
 
   return (
     <div className="login-page">
@@ -42,12 +58,13 @@ function Login() {
           </div>
           <button type="submit">Login</button>
         </form>
+        {error ? <p>Error: {error}</p>: <></>}
         <p>
           New user? <Link to="/register">Create an account</Link>
         </p>
       </div>
     </div>
   );
-}
 
+}
 export default Login;
