@@ -57,7 +57,7 @@ const Parts = ({ cart, onCartChange }) => {
 
   // Component Type Filter UI
   const componentTypes = [
-    { label: 'All Parts', value: '' },
+    { label: 'All Parts', value: 'all' },
     { label: 'CPU', value: 'cpu' },
     { label: 'Storage', value: 'storage' },
     { label: 'GPU', value: 'gpu' },
