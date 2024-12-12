@@ -4,7 +4,33 @@ import '../assets/css/Parts.css';
 
 const Parts = ({ cart, onCartChange }) => {
   const [parts, setParts] = useState([]);
+  const [filteredParts, setFilteredParts] = useState([]);
   const [error, setError] = useState(null);
+
+  // Filter state
+  const [selectedComponentType, setSelectedComponentType] = useState('');
+
+  // Fetch parts from the API
+  useEffect(() => {
+    const fetchParts = async () => {
+      try {
+        const data = await listParts(selectedComponentType); 
+        setParts(data);
+        setFilteredParts(data); 
+      } catch (err) {
+        setError('Failed to fetch parts');
+        console.error('Error fetching parts:', err);
+      }
+    };
+
+    if (selectedComponentType) {
+      fetchParts(); 
+    } else {
+      setParts([]); 
+      setFilteredParts([]); 
+    }
+  }, [selectedComponentType]);
+
 
   useEffect(() => {
     const fetchParts = async () => {
@@ -29,10 +55,35 @@ const Parts = ({ cart, onCartChange }) => {
     console.log(`Adding ${part.part_name} to the cart.`);
   };
 
+  // Component Type Filter UI
+  const componentTypes = [
+    { label: 'All Parts', value: '' },
+    { label: 'CPU', value: 'cpu' },
+    { label: 'Storage', value: 'storage' },
+    { label: 'GPU', value: 'gpu' },
+    { label: 'Motherboard', value: 'motherboard' },
+    { label: 'Case', value: 'case' },
+    { label: 'Cooling', value: 'cooling' }
+  ];
+
+
   return (
     <div className="parts-container">
       <h1 className="parts-title">Parts List</h1>
       {error && <p style={{ color: 'red' }}>{error}</p>}
+       {/* Filter UI */}
+       <div className="filters">
+        <select
+          value={selectedComponentType}
+          onChange={(e) => setSelectedComponentType(e.target.value)}
+        >
+          {componentTypes.map((component, index) => (
+            <option key={index} value={component.value}>
+              {component.label}
+            </option>
+          ))}
+        </select>
+      </div>
       <ul className="parts-list">
         {parts.map((part, index) => (
           <li key={index} className="part-item">
