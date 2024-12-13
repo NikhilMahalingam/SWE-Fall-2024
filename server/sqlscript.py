@@ -30,7 +30,7 @@ def import_csv_to_databse(csv_file):
             header = next(csv_reader)
             row_number = 0
 
-            sqlite_insert_query = """INSERT INTO Computer_Part(part_name, brand, size, date_posted, unit_price, slug, ComponentType, OtherInfo) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"""
+            sqlite_insert_query = """INSERT INTO Computer_Part(part_name, brand, date_posted, unit_price, slug, component_type, other_info) VALUES (?, ?, ?, ?, ?, ?, ?)"""
 
 
             cpu_insert_query ="""INSERT INTO Cpu(part_id, cores) VALUES (?, ?)"""
@@ -52,13 +52,13 @@ def import_csv_to_databse(csv_file):
 
                 part_id = cursor.lastrowid
 
-                component_type = str(row[6])
+                component_type = str(row[5])
                 
                 if component_type.__eq__('GPU'):
-                    vram = row[7]
+                    vram = row[6]
                     cursor.execute(gpu_insert_query, (part_id, vram))
                 elif component_type.__eq__('CPU'):
-                    cores = row[7]
+                    cores = row[6]
 
                     try: 
                         cores = int(cores)
@@ -67,16 +67,16 @@ def import_csv_to_databse(csv_file):
                         print(f"Warning: Invalid cores value for CPU with part_id {part_id}: {cores}")
                         continue 
                 elif component_type.__eq__('Motherboard'):
-                    form_factor = row[7]
+                    form_factor = row[6]
                     cursor.execute(motherboard_insert_query, (part_id, form_factor))
                 elif component_type.__eq__('Cooling'):
-                    method = row[7]
+                    method = row[6]
                     cursor.execute(cooling_insert_query, (part_id, method))
                 elif component_type.__eq__('Storage'):
-                    memory = row[7]
+                    memory = row[6]
                     cursor.execute(memory_insert_query, (part_id, memory))
                 elif component_type.__eq__('Computer Case'):
-                    size = row[7]
+                    size = row[6]
                     size = float(size)
                     cursor.execute(computer_case_insert_query, (part_id, size))
 

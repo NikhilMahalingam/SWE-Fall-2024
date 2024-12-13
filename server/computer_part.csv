@@ -1,3 +1,15 @@
-part_name, brand, size, date_posted, unit_price, slug, ComponentType, OtherInfo
-NVIDIA GeForce RTX 4090 (Duplicate),NVIDIA,0.0,2024-12-13,1599.99,nvidia-geforce-rtx-4090,GPU, 24GB
-AMD Ryzen 5 5600X (Duplicate),AMD,0.0,2024-12-13,199.99,amd-ryzen-5-5600x,CPU, 6
+part_name, brand, date_posted, unit_price, slug, component_type, other_info
+NVIDIA GeForce RTX 4070 Ti,NVIDIA,2024-12-13,799.99,nvidia-geforce-rtx-4070-ti,GPU, 12GB
+AMD Ryzen 7 7700X,AMD,2024-12-13,329.99,amd-ryzen-7-7700x,CPU, 8
+Corsair Vengeance LPX 16GB,Corsair,2024-12-13,69.99,corsair-vengeance-lpx-16gb,Memory, DDR4 3200MHz
+ASUS ROG Strix X670-E,ASUS,2024-12-13,299.99,asus-rog-strix-x670-e,Motherboard, ATX form factor
+Noctua NH-D15,Noctua,2024-12-13,99.99,noctua-nh-d15,Cooling, Air Cooler
+Samsung 970 EVO Plus 1TB,Samsung,2024-12-13,109.99,samsung-970-evo-plus-1tb,Storage, 1TB NVMe SSD
+NZXT H510, NZXT, 2024-12-13, 79.99,nzxt-h510,Computer Case, 17.7
+Intel Core i9-13900K,Intel,2024-12-13,799.99,intel-core-i9-13900k,CPU, 24
+MSI GeForce RTX 3060 Ti,MSI,2024-12-13,399.99,msi-geforce-rtx-3060-ti,GPU, 8GB
+Crucial Ballistix 32GB,Crucial,2024-12-13,129.99,crucial-ballistix-32gb,Memory, DDR4 3600MHz
+Gigabyte Z790 AORUS Elite,Gigabyte,2024-12-13,219.99,gigabyte-z790-aorus-elite,Motherboard, ATX form factor
+Corsair iCUE H150i, Corsair, 2024-12-13, 169.99,corsair-icue-h150i,Cooling, Liquid Cooler
+Western Digital Black SN850X 2TB,Western Digital,2024-12-13,189.99,wd-black-sn850x-2tb,Storage, 2TB NVMe SSD
+Phanteks Eclipse P400A,Phanteks,2024-12-13,69.99,phanteks-eclipse-p400a,Computer Case, 18.5
