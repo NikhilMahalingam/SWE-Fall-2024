@@ -11,10 +11,17 @@
 //   }
 // }
 
-export async function listPart(componentType) {
+export async function listPart(componentType, componentAttribute, searchQuery) {
   try 
   {
-    const url = `http://localhost:8000/listpart/components?componentType=${componentType}`; 
+    //const url = `http://localhost:8000/listpart?searchQuery=${searchQuery}&componentType=${componentType}&componentAttribute=${componentAttribute}`;
+    
+    //dynamically add queries to url
+    let url = `http://localhost:8000/listpart?`;
+    if(componentType){url += `componentType=${componentType}&`;} 
+    if(componentAttribute){url += `componentAttribute=${componentAttribute}&`;}
+    if(searchQuery){url += `searchQuery=${searchQuery}&`;} 
+
     const response = await fetch(url);
     console.log('Fetching rows from: ', url);
     if (!response.ok) {

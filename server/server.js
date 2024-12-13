@@ -112,6 +112,8 @@ route.listen(port, () => {
   console.log(`Server is listening on port ${port}.`);
 });
 
+//redundant?
+/*
 route.get('/listpart', (req, res) => {
   try {
     db.all("SELECT part_name, brand, unit_price, slug FROM Computer_Part", [], (err, rows) => {
@@ -125,7 +127,9 @@ route.get('/listpart', (req, res) => {
     res.status(500).json({ error: "Server error", details: error.message });
   }
 });
+*/
 
+/*
 route.get('/listpart/components', async (req, res) => {
   const { componentType } = req.query;
 
@@ -178,6 +182,122 @@ route.get('/listpart/components', async (req, res) => {
 
 });
 
+route.get('/listpart/search', async (req, res) => {
+  const {searchQuery} = req.query; 
+  let sqlQuery = 
+  `
+    SELECT part_name, brand, unit_price, slug FROM Computer_Part
+    WHERE part_name LIKE '%${searchQuery}%';
+  `;
+
+  console.log('Executing query:', sqlQuery);  // Log the query for debugging
+
+  try {
+    // Execute the query using db.all
+    db.all(sqlQuery, [], (err, rows) => {
+      if (err) {
+        return res.status(500).json({ error: "Database error", details: err.message });
+      }
+
+      // Send the results as JSON
+      res.status(200).json(rows);
+    });
+  } catch (error) {
+    // Handle server-side errors
+    res.status(500).json({ error: "Server error", details: error.message });
+  } 
+});
+*/
+
+//more general listpart function with ability to filter by component type, attributes within each component
+//and search within the filtered results
+route.get('/listpart', async (req, res) => {
+  const{searchQuery, componentType, componentAttribute} = req.query;
+  let query = 'SELECT part_name, brand, unit_price, slug FROM Computer_Part';
+
+  if (componentType) {
+    switch (componentType) {
+      case 'cpu':
+        if(componentAttribute){
+          query += ` WHERE EXISTS (SELECT 1 FROM Cpu WHERE Cpu.part_id = Computer_Part.part_id AND Cpu.cores=${componentAttribute});`
+        } else {
+          query += ' WHERE EXISTS (SELECT 1 FROM Cpu WHERE Cpu.part_id = Computer_Part.part_id)';
+        }
+        break;
+      case 'gpu':
+        if(componentAttribute){
+          query += ` WHERE EXISTS (SELECT 1 FROM Gpu WHERE Gpu.part_id = Computer_Part.part_id AND Gpu.vram="${componentAttribute}");`
+        } else {
+          query += ' WHERE EXISTS (SELECT 1 FROM Gpu WHERE Gpu.part_id = Computer_Part.part_id)';
+        }
+        break;
+      case 'storage':
+        if(componentAttribute){
+          query += ` WHERE EXISTS (SELECT 1 FROM Storage_Device WHERE Storage_Device.part_id = Computer_Part.part_id AND Storage_Device.memory="${componentAttribute}");`
+        } else {
+          query += ' WHERE EXISTS (SELECT 1 FROM Storage_Device WHERE Storage_Device.part_id = Computer_Part.part_id)';
+        }
+        break;
+      case 'motherboard':
+        if(componentAttribute){
+          query += ` WHERE EXISTS (SELECT 1 FROM Motherboard WHERE Motherboard.part_id = Computer_Part.part_id AND Motherboard.form_factor="${componentAttribute}");`
+        } else {
+          query += ' WHERE EXISTS (SELECT 1 FROM Motherboard WHERE Motherboard.part_id = Computer_Part.part_id)';
+        }
+        break;
+      case 'case':
+        if(componentAttribute){
+          query += ` WHERE EXISTS (SELECT 1 FROM Computer_case WHERE Computer_case.part_id = Computer_Part.part_id AND Computer_case.size=${componentAttribute});`
+        } else {
+          query += ' WHERE EXISTS (SELECT 1 FROM Computer_case WHERE Computer_case.part_id = Computer_Part.part_id)';
+        }
+        break;
+      case 'cooling':
+        if(componentAttribute){
+          query += ` WHERE EXISTS (SELECT 1 FROM Cooling WHERE Cooling.part_id = Computer_Part.part_id AND Cooling.method="${componentAttribute}");`
+        } else {
+          query += ' WHERE EXISTS (SELECT 1 FROM Cooling WHERE Cooling.part_id = Computer_Part.part_id)';
+        }
+        break;
+      case 'all':
+        // For 'all', just return all parts without filtering
+        //no need to check for componentAttribute since component type isn't specified
+        break;
+      default:
+        return res.status(400).send('Invalid component type');
+    }
+  }
+
+  //searches within filtered results
+  if(searchQuery && componentType != 'all') {
+    query += `
+    AND part_name LIKE '%${searchQuery}%';
+    `;
+  }
+
+  if(searchQuery && componentType == 'all') {
+    query += `
+    WHERE part_name LIKE '%${searchQuery}%';
+    `;
+  }
+
+  console.log('Executing query:', query);  // Log the query for debugging
+
+  try {
+    // Execute the query using db.all
+    db.all(query, [], (err, rows) => {
+      if (err) {
+        return res.status(500).json({ error: "Database error", details: err.message });
+      }
+
+      // Send the results as JSON
+      res.status(200).json(rows);
+    });
+  } catch (error) {
+    // Handle server-side errors
+    res.status(500).json({ error: "Server error", details: error.message });
+  }
+});
 
 route.get('/listprebuilt', (req, res) => {
   try {
