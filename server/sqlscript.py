@@ -1,28 +1,39 @@
 import sqlite3
+import csv
+
+def import_csv_to_databse(csv_file):
+
+    try: 
+        sqliteConnection = sqlite3.connect('database.db')
+        cursor = sqliteConnection.cursor()
+        print("Successfully Connected to SQlite")
 
 
-try: 
-    sqliteConnection = sqlite3.connect('database.db')
-    cursor = sqliteConnection.cursor()
-    print("Successfully Connected to SQlite")
-    sqlite_insert_query = """INSERT INTO Computer_Part(part_name, brand, date_posted, unit_price, slug, size) VALUES (?, ?, ?, ?, ?, ?)"""
-    
-    part_name = "example"
-    brand = "example"
-    date_posted = "2024-12-13"
-    unit_price = 159.99
-    slug = ""
-    size = "medium"
+        with open(csv_file, mode='r') as file:
+            csv_reader = csv.reader(file)
+            header = next(csv_reader)
+            sqlite_insert_query = """INSERT INTO Computer_Part(part_name, brand, size, date_posted, unit_price, slug) VALUES (?, ?, ?, ?, ?, ?)"""
 
-    count = cursor.execute(sqlite_insert_query, (part_name, brand, date_posted, unit_price, slug, size))
-    sqliteConnection.commit()
-    print("Record inserted successfully into SqliteDb_developers table", cursor.rowcount); 
-    cursor.close()
+            for row in csv_reader: 
+                cursor.execute(sqlite_insert_query, row)
 
-except sqlite3.Error as error:
-    print("Failed to insert data into sqlite table", error)
-finally:
-    if sqliteConnection: 
-        sqliteConnection.close()
-        print("The SQLite connection is closed")
-    
+
+        sqliteConnection.commit()
+        print("Record of {cursor.rowcount} inserted successfully into SqliteDb_developers table", cursor.rowcount); 
+        cursor.close()
+
+    except sqlite3.Error as error:
+        if "database is locked" in str(error):
+                print("Database is locked. Retrying...")
+                retries -= 1
+                time.sleep(2)  # Wait 2 seconds before retrying
+        else:
+            print("Failed to insert data into SQLite table", error)
+    finally:
+        if sqliteConnection: 
+            sqliteConnection.close()
+            print("The SQLite connection is closed")
+
+
+import_csv_to_databse('computer_part.csv')
+        

@@ -1,0 +1,3 @@
+part_name, brand, size, date_posted, unit_price, slug
+'NVIDIA GeForce RTX 4090 (Duplicate)','NVIDIA','0.0',2024-12-13,1599.99,'nvidia-geforce-rtx-4090'
+'AMD Ryzen 5 5600X (Duplicate)','AMD','0.0',2024-12-13,199.99,'amd-ryzen-5-5600x'
