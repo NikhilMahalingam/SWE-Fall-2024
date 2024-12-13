@@ -126,6 +126,59 @@ route.get('/listpart', (req, res) => {
   }
 });
 
+route.get('/listpart/components', async (req, res) => {
+  const { componentType } = req.query;
+
+  let query = 'SELECT part_name, brand, unit_price, slug FROM Computer_Part';
+
+  if (componentType) {
+    switch (componentType) {
+      case 'cpu':
+        query += ' WHERE EXISTS (SELECT 1 FROM Cpu WHERE Cpu.part_id = Computer_Part.part_id)';
+        break;
+      case 'gpu':
+        query += ' WHERE EXISTS (SELECT 1 FROM Gpu WHERE Gpu.part_id = Computer_Part.part_id)';
+        break;
+      case 'storage':
+        query += ' WHERE EXISTS (SELECT 1 FROM Storage_Device WHERE Storage_Device.part_id = Computer_Part.part_id)';
+        break;
+      case 'motherboard':
+        query += ' WHERE EXISTS (SELECT 1 FROM Motherboard WHERE Motherboard.part_id = Computer_Part.part_id)';
+        break;
+      case 'case':
+        query += ' WHERE EXISTS (SELECT 1 FROM Computer_case WHERE Computer_case.part_id = Computer_Part.part_id)';
+        break;
+      case 'cooling':
+        query += ' WHERE EXISTS (SELECT 1 FROM Cooling WHERE Cooling.part_id = Computer_Part.part_id)';
+        break;
+      case 'all':
+        // For 'all', just return all parts without filtering
+        break;
+      default:
+        return res.status(400).send('Invalid component type');
+    }
+  }
+
+  console.log('Executing query:', query);  // Log the query for debugging
+
+  try {
+    // Execute the query using db.all
+    db.all(query, [], (err, rows) => {
+      if (err) {
+        return res.status(500).json({ error: "Database error", details: err.message });
+      }
+
+      // Send the results as JSON
+      res.status(200).json(rows);
+    });
+  } catch (error) {
+    // Handle server-side errors
+    res.status(500).json({ error: "Server error", details: error.message });
+  }
+
+});
+
+
 route.get('/listprebuilt', (req, res) => {
   try {
     db.all("SELECT build_name, build_price FROM Pre_Build", [], (err, rows) => {
@@ -142,3 +195,4 @@ route.get('/listprebuilt', (req, res) => {
 route.get("*", (req, res)=> {
   res.sendFile(path.resolve('..', 'client', 'build', 'index.html'));
 });
+
