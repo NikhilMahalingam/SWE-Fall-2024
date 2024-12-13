@@ -12,7 +12,9 @@ CREATE TABLE IF NOT EXISTS Computer_Part(
     brand TEXT NOT NULL,
     date_posted DATETIME NOT NULL,
     unit_price FLOAT NOT NULL,
-    slug TEXT NULL
+    slug TEXT NULL, 
+    component_type TEXT NOT NULL, 
+    other_info TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS Cpu(
