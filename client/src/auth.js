@@ -13,7 +13,7 @@
 // const app = initializeApp(firebaseConfig);
 // const auth = getAuth(app);
 
-export let createUserWithEmailAndPassword = async (email, password) => {
+export let createUserWithEmailAndPassword = async (name, email, password) => {
   return fetch("/register", {
       method: "POST",
       headers: {
@@ -21,7 +21,7 @@ export let createUserWithEmailAndPassword = async (email, password) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        name: email,
+        name: name ,
         password,
         email
       })

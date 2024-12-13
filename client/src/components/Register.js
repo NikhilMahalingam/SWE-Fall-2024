@@ -8,6 +8,7 @@ import '../assets/css/Register.css';
 function Register() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const navigate = useNavigate();
 
@@ -18,7 +19,7 @@ function Register() {
       return;
     }
     try {
-      await createUserWithEmailAndPassword(username, password);
+      await createUserWithEmailAndPassword(name, username, password);
       alert('Account created successfully');
       navigate('/login');
     } catch (error) {
@@ -31,6 +32,17 @@ function Register() {
       <div className="register-container">
         <h1>New Account</h1>
         <form className="register-form" onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label htmlFor="new-name">Name:</label>
+            <input
+              type="name"
+              id="new-name"
+              name="new-name"
+              required
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+          </div>
           <div className="form-group">
             <label htmlFor="new-username">Email:</label>
             <input

@@ -27,7 +27,7 @@ function Navbar({ user }) {
         </li>
         <li>
         {user 
-        ? <text className="navbar-link">Welcome, {user.email}</text>
+        ? <text className="navbar-link">Welcome, {user.name}</text>
         : <Link to="/login" className="navbar-link">Login</Link>
         }
         </li>

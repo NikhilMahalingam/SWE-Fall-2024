@@ -70,15 +70,15 @@ route.post('/create-payment-intent', async (req, res) => {
 });
 
 route.post('/register', async (req, res) => {
-  const { email, password } = req.body;
+  const { name, email, password } = req.body;
 
-  if (!email || !password) {
+  if (!name || !email || !password) {
     res.status(400).json({ error: 'Bad email/password' });
     return;
   }
 
   try {
-    db.run("INSERT INTO User_Account (name, password, email, isAdmin) VALUES ($email, $password, $email, 0);", {$email: email, $password: password}, function (err) {
+    db.run("INSERT INTO User_Account (name, password, email, isAdmin) VALUES ($name, $password, $email, 0);", {$name: name, $email: email, $password: password}, function (err) {
       if (err) throw err;
       res.status(201).json({id: this.lastID});
     });
@@ -88,7 +88,7 @@ route.post('/register', async (req, res) => {
 });
 
 route.post('/login', async (req, res) => {
-  const { email, password } = req.body;
+  const {email, password } = req.body;
 
   if (!email || !password) {
     res.status(400).json({ error: 'Bad email/password' });
@@ -96,7 +96,7 @@ route.post('/login', async (req, res) => {
   }
 
   try {
-    db.get("SELECT * FROM User_Account WHERE name = $email AND password = $password;", {$email: email, $password: password}, (err, row) => {
+    db.get("SELECT * FROM User_Account WHERE email = $email AND password = $password;", {$email: email, $password: password}, (err, row) => {
       if (err) res.status(400).json({ error: process.env.DEBUG ? err.toString() : 'Failed' });
       else if (!row) res.status(400).json({ error: process.env.DEBUG ? "No such username/password" : 'Failed' });
       else res.status(200).json({user: row});
