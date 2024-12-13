@@ -1,7 +1,23 @@
 import sqlite3
 import csv
+import os
 
+
+def update_last_row(row_num, filename='last_row.txt'):
+    with open(filename, 'w') as file: 
+        file.write(str(row_num))
+
+def get_last_row(filename='last_row.txt'):
+    if os.path.exists(filename):
+        with open(filename, 'r') as file:
+            last_row = file.read().strip()
+            return int(last_row) if last_row.isdigit else 0
+    return 0
+        
 def import_csv_to_databse(csv_file):
+
+    last_row = get_last_row()
+    print(f"Starting from row {last_row + 1}")
 
     try: 
         sqliteConnection = sqlite3.connect('database.db')
@@ -12,6 +28,8 @@ def import_csv_to_databse(csv_file):
         with open(csv_file, mode='r') as file:
             csv_reader = csv.reader(file)
             header = next(csv_reader)
+            row_number = 0
+
             sqlite_insert_query = """INSERT INTO Computer_Part(part_name, brand, size, date_posted, unit_price, slug, ComponentType, OtherInfo) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"""
 
 
@@ -27,6 +45,11 @@ def import_csv_to_databse(csv_file):
             for row in csv_reader: 
                 cursor.execute(sqlite_insert_query, row)
 
+                row_number += 1
+
+                if row_number <= last_row: 
+                    continue
+
                 part_id = cursor.lastrowid
 
                 component_type = str(row[6])
@@ -34,38 +57,35 @@ def import_csv_to_databse(csv_file):
                 if component_type.__eq__('GPU'):
                     vram = row[7]
                     cursor.execute(gpu_insert_query, (part_id, vram))
-                    sqliteConnection.commit()
                 elif component_type.__eq__('CPU'):
                     cores = row[7]
 
                     try: 
                         cores = int(cores)
                         cursor.execute(cpu_insert_query, (part_id, cores))
-                        sqliteConnection.commit()
                     except error:
                         print(f"Warning: Invalid cores value for CPU with part_id {part_id}: {cores}")
                         continue 
                 elif component_type.__eq__('Motherboard'):
                     form_factor = row[7]
                     cursor.execute(motherboard_insert_query, (part_id, form_factor))
-                    sqliteConnection.commit()
                 elif component_type.__eq__('Cooling'):
                     method = row[7]
                     cursor.execute(cooling_insert_query, (part_id, method))
-                    sqliteConnection.commit()
                 elif component_type.__eq__('Storage'):
                     memory = row[7]
                     cursor.execute(memory_insert_query, (part_id, memory))
-                    sqliteConnection.commit()
                 elif component_type.__eq__('Computer Case'):
                     size = row[7]
                     size = float(size)
                     cursor.execute(computer_case_insert_query, (part_id, size))
-                    sqliteConnection.commit()
-                        
 
 
                 sqliteConnection.commit()
+            
+            update_last_row(row_number)
+            print(f"Processed {row_number} rows.")
+            
                     
         
         print(f"Record of {cursor.rowcount} inserted successfully into SqliteDb_developers table", cursor.rowcount); 
