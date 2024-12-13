@@ -35,8 +35,7 @@ def import_csv_to_databse(csv_file):
                     vram = row[7]
                     cursor.execute(gpu_insert_query, (part_id, vram))
                     sqliteConnection.commit()
-                
-                if component_type.__eq__('CPU'):
+                elif component_type.__eq__('CPU'):
                     cores = row[7]
 
                     try: 
@@ -45,7 +44,24 @@ def import_csv_to_databse(csv_file):
                         sqliteConnection.commit()
                     except error:
                         print(f"Warning: Invalid cores value for CPU with part_id {part_id}: {cores}")
-                        continue  # Skip this row if the cores value is invalid
+                        continue 
+                elif component_type.__eq__('Motherboard'):
+                    form_factor = row[7]
+                    cursor.execute(motherboard_insert_query, (part_id, form_factor))
+                    sqliteConnection.commit()
+                elif component_type.__eq__('Cooling'):
+                    method = row[7]
+                    cursor.execute(cooling_insert_query, (part_id, method))
+                    sqliteConnection.commit()
+                elif component_type.__eq__('Storage'):
+                    memory = row[7]
+                    cursor.execute(memory_insert_query, (part_id, memory))
+                    sqliteConnection.commit()
+                elif component_type.__eq__('Computer Case'):
+                    size = row[7]
+                    size = float(size)
+                    cursor.execute(computer_case_insert_query, (part_id, size))
+                    sqliteConnection.commit()
                         
 
 
