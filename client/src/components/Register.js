@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import { createUserWithEmailAndPassword } from '../auth.js';
 import '../assets/css/Register.css';
+import bcryptjs from 'bcryptjs';
+const bycrypt = require('bcryptjs');
 
 function Register() {
   const [username, setUsername] = useState('');
@@ -19,6 +21,9 @@ function Register() {
       return;
     }
     try {
+      const hashedPassword = await hashPassword(password);
+      console.log('Type of hashedPassword: ', typeof password);
+      console.log('Hashed password: ', hashedPassword);
       await createUserWithEmailAndPassword(name, username, password);
       alert('Account created successfully');
       navigate('/login');
@@ -86,6 +91,20 @@ function Register() {
       </div>
     </div>
   );
+}
+
+async function hashPassword(password){ 
+  const saltRounds = 10; 
+  try {
+    const hash = bcryptjs.hashSync(password, 10);   
+    if (typeof hash !== 'string') {
+      throw new Error('Hash is not a string');
+    }
+    return hash;
+  } catch (error) {
+    console.error('Error hashing password:', error);
+    throw error; 
+  }
 }
 
 export default Register;
