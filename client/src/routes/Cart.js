@@ -38,9 +38,14 @@ function Cart({ cart, onCartChange }) {
   return (
     <div>
       <h1>Your Cart</h1>
+      {cart.map((part, idx) => (
+          <li key={idx}>
+            {part.part_name} - ${part.unit_price}
+          </li>
+        ))}
       <button onClick={handleCheckoutClick}>Checkout</button>
 
-      {showCheckout && (
+      {showCheckout && stripePromise && (
         <Elements stripe={stripePromise}>
           <CheckoutForm />
         </Elements>
