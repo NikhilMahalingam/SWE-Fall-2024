@@ -72,7 +72,7 @@ def import_csv_to_databse(csv_file):
                 elif component_type.__eq__('Cooling'):
                     method = row[6]
                     cursor.execute(cooling_insert_query, (part_id, method))
-                elif component_type.__eq__('Storage'):
+                elif component_type.__eq__('Memory'):
                     memory = row[6]
                     cursor.execute(memory_insert_query, (part_id, memory))
                 elif component_type.__eq__('Computer Case'):
