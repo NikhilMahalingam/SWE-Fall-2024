@@ -78,15 +78,16 @@ route.post('/register', async (req, res) => {
     res.status(400).json({ error: 'Bad email/password' });
     return;
   }
-
-  try {
-    db.run("INSERT INTO User_Account (name, password, email, isAdmin) VALUES ($name, $password, $email, 0);", {$name: name, $email: email, $password: password}, function (err) {
-      if (err) throw err;
-      res.status(201).json({id: this.lastID});
-    });
-  } catch (err) {
-    res.status(400).json({ error: process.env.DEBUG ? err.toString() : 'Failed' });
-  }
+  hashPassword(password).then((hash) => {
+    try{ 
+      db.run("INSERT INTO User_Account (name, password, email, isAdmin) VALUES ($name, $password, $email, 0);", {$name: name, $email: email, $password: hash}, function (err) {
+        if (err) throw err;
+        res.status(201).json({id: this.lastID});
+      });
+    } catch (err) {
+      res.status(400).json({ error: process.env.DEBUG ? err.toString() : 'Failed' });
+    }
+  }); 
 });
 
 route.post('/login', async (req, res) => {
@@ -332,5 +333,19 @@ async function checkPassword(password, hash) {
   }catch(error){
     console.error('Error checking password:', error);
     throw error;
+  }
+}
+
+async function hashPassword(password){ 
+  const saltRounds = 10; 
+  try {
+    const hash = await bycryptjs.hashSync(password, 10);   
+    if (typeof hash !== 'string') {
+      throw new Error('Hash is not a string');
+    }
+    return hash;
+  } catch (error) {
+    console.error('Error hashing password:', error);
+    throw error; 
   }
 }
