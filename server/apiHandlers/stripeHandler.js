@@ -6,7 +6,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 async function createPaymentIntent(amount) {
   try {
     const paymentIntent = await stripe.paymentIntents.create({
-      amount, // Amount in cents
+      amount, 
       currency: 'usd',
       payment_method_types: ['card'],
     });
@@ -18,5 +18,5 @@ async function createPaymentIntent(amount) {
   }
 }
 
-export { createPaymentIntent }; 
+
 export default { createPaymentIntent }; 

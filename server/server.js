@@ -166,21 +166,35 @@ function addOrUpdateConsists(order_id, part_id, quantity, res) {
   });
 }
 
+route.delete('/cart/remove', (req, res) => {
+  const { user_id, part_id } = req.body;
 
-
-route.post('/cart/checkout', (req, res) => {
-  const { user_id } = req.body;
-  if (!user_id) return res.status(400).json({ error: "Missing user_id" });
-
-  // Mark the "In Cart" order as 'Completed'
-  const sql = `
-    UPDATE Parts_Order
-    SET status = 'Completed'
+  if (!user_id || !part_id) {
+    return res.status(400).json({ error: "Missing user_id or part_id." });
+  }
+  const findOrderSql = `
+    SELECT order_id FROM Parts_Order 
     WHERE user_id = $user_id AND status = 'In Cart'
+    ORDER BY order_id DESC LIMIT 1
   `;
-  db.run(sql, { $user_id: user_id }, function (err) {
+  db.get(findOrderSql, { $user_id: user_id }, (err, orderRow) => {
     if (err) return res.status(500).json({ error: err.message });
-    res.json({ success: true, message: 'Cart checked out' });
+
+    if (!orderRow) {
+      return res.status(400).json({ error: "No active cart found for user" });
+    }
+
+    const deleteSql = `
+      DELETE FROM Consists
+      WHERE order_id = $order_id AND part_id = $part_id
+    `;
+    db.run(deleteSql, { $order_id: orderRow.order_id, $part_id: part_id }, function (deleteErr) {
+      if (deleteErr) return res.status(500).json({ error: deleteErr.message });
+      if (this.changes === 0) {
+        return res.status(400).json({ error: "Item not found in cart" });
+      }
+      res.json({ success: true, message: 'Part removed from cart' });
+    });
   });
 });
 
