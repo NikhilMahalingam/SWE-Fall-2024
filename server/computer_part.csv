@@ -1,3 +1,77 @@
-part_name, brand, size, date_posted, unit_price, slug, ComponentType, OtherInfo
-NVIDIA GeForce RTX 4090 (Duplicate),NVIDIA,0.0,2024-12-13,1599.99,nvidia-geforce-rtx-4090,GPU, 24GB
-AMD Ryzen 5 5600X (Duplicate),AMD,0.0,2024-12-13,199.99,amd-ryzen-5-5600x,CPU, 6
+part_name, brand, date_posted, unit_price, slug, component_type, other_info
+NVIDIA GeForce RTX 4070 Ti,NVIDIA,2024-12-13,799.99,nvidia-geforce-rtx-4070-ti,GPU, 12GB
+AMD Ryzen 7 7700X,AMD,2024-12-13,329.99,amd-ryzen-7-7700x,CPU, 8
+Corsair Vengeance LPX 16GB,Corsair,2024-12-13,69.99,corsair-vengeance-lpx-16gb,Memory, DDR4 3200MHz
+ASUS ROG Strix X670-E,ASUS,2024-12-13,299.99,asus-rog-strix-x670-e,Motherboard, ATX form factor
+Noctua NH-D15,Noctua,2024-12-13,99.99,noctua-nh-d15,Cooling, Air Cooler
+Samsung 970 EVO Plus 1TB,Samsung,2024-12-13,109.99,samsung-970-evo-plus-1tb,Storage, 1TB NVMe SSD
+NZXT H510, NZXT, 2024-12-13, 79.99,nzxt-h510,Computer Case, 17.7
+Intel Core i9-13900K,Intel,2024-12-13,799.99,intel-core-i9-13900k,CPU, 24
+MSI GeForce RTX 3060 Ti,MSI,2024-12-13,399.99,msi-geforce-rtx-3060-ti,GPU, 8GB
+Crucial Ballistix 32GB,Crucial,2024-12-13,129.99,crucial-ballistix-32gb,Memory, DDR4 3600MHz
+Gigabyte Z790 AORUS Elite,Gigabyte,2024-12-13,219.99,gigabyte-z790-aorus-elite,Motherboard, ATX form factor
+Corsair iCUE H150i, Corsair, 2024-12-13, 169.99,corsair-icue-h150i,Cooling, Liquid Cooler
+Western Digital Black SN850X 2TB,Western Digital,2024-12-13,189.99,wd-black-sn850x-2tb,Storage, 2TB NVMe SSD
+Phanteks Eclipse P400A,Phanteks,2024-12-13,69.99,phanteks-eclipse-p400a,Computer Case, 18.5
+Intel Core i7-13700K,Intel,2024-12-13,549.99,intel-core-i7-13700k,CPU, 16
+AMD Ryzen 5 7600X,AMD,2024-12-13,249.99,amd-ryzen-5-7600x,CPU, 6
+Intel Core i5-13600K,Intel,2024-12-13,369.99,intel-core-i5-13600k,CPU, 14
+AMD Ryzen 9 7900X,AMD,2024-12-13,749.99,amd-ryzen-9-7900x,CPU, 12
+Intel Core i9-11900K,Intel,2024-12-13,799.99,intel-core-i9-11900k,CPU, 16
+AMD Ryzen 3 7300X,AMD,2024-12-13,199.99,amd-ryzen-3-7300x,CPU, 4
+Intel Core i5-12600KF,Intel,2024-12-13,359.99,intel-core-i5-12600kf,CPU, 10
+AMD Ryzen 7 5800X3D,AMD,2024-12-13,459.99,amd-ryzen-7-5800x3d,CPU, 8
+Intel Core i3-13100,Intel,2024-12-13,129.99,intel-core-i3-13100,CPU, 4
+AMD Ryzen 9 7950X3D,AMD,2024-12-13,899.99,amd-ryzen-9-7950x3d,CPU, 16
+MSI GeForce RTX 4080,MSI,2024-12-13,1299.99,msi-geforce-rtx-4080,GPU, 16GB
+ASUS ROG Strix RTX 3090,ASUS,2024-12-13,1499.99,asus-rog-strix-rtx-3090,GPU, 24GB
+EVGA GeForce RTX 4070,EVGA,2024-12-13,599.99,evga-geforce-rtx-4070,GPU, 12GB
+Gigabyte GeForce GTX 1660 Ti,Gigabyte,2024-12-13,249.99,gigabyte-geforce-gtx-1660-ti,GPU, 6GB
+ZOTAC RTX 3060,ZOTAC,2024-12-13,399.99,zotac-rtx-3060,GPU, 12GB
+PNY GeForce RTX 4080 XLR8,PNY,2024-12-13,1399.99,pny-geforce-rtx-4080-xlr8,GPU, 16GB
+Sapphire Pulse RX 6800 XT,Sapphire,2024-12-13,699.99,sapphire-pulse-rx-6800-xt,GPU, 16GB
+XFX Radeon RX 7900 XT,XFX,2024-12-13,1099.99,xfx-radeon-rx-7900-xt,GPU, 20GB
+ASUS Dual RTX 3050,ASUS,2024-12-13,259.99,asus-dual-rtx-3050,GPU, 8GB
+Palit GeForce GTX 1650,Palit,2024-12-13,179.99,palit-geforce-gtx-1650,GPU, 4GB
+Corsair Vengeance LPX 32GB,Corsair,2024-12-13,129.99,corsair-vengeance-lpx-32gb,Memory, DDR4 3600MHz
+G.SKILL Ripjaws V 16GB,G.SKILL,2024-12-13,89.99,gskill-ripjaws-v-16gb,Memory, DDR4 3200MHz
+Crucial Ballistix 64GB,Crucial,2024-12-13,259.99,crucial-ballistix-64gb,Memory, DDR4 4000MHz
+Kingston Fury Beast 16GB,Kingston,2024-12-13,79.99,kingston-fury-beast-16gb,Memory, DDR4 3000MHz
+Corsair Vengeance RGB Pro 32GB,Corsair,2024-12-13,169.99,corsair-vengeance-rgb-pro-32gb,Memory, DDR4 3600MHz
+HyperX Fury 16GB,HyperX,2024-12-13,89.99,hyperx-fury-16gb,Memory, DDR4 3200MHz
+ADATA XPG Z1 8GB,ADATA,2024-12-13,39.99,adata-xpg-z1-8gb,Memory, DDR4 2400MHz
+Team T-Force Delta RGB 32GB,Team Group,2024-12-13,159.99,team-t-force-delta-rgb-32gb,Memory, DDR4 3600MHz
+Patriot Viper 4 16GB,Patriot,2024-12-13,79.99,patriot-viper-4-16gb,Memory, DDR4 2666MHz
+Ballistix Sport LT 16GB,Crucial,2024-12-13,69.99,ballistix-sport-lt-16gb,Memory, DDR4 2666MHz
+part_name, brand, date_posted, unit_price, slug, component_type, other_info
+be quiet! Pure Rock 2,be quiet!,2024-12-13,39.99,be-quiet-pure-rock-2,Cooling, Air Cooler
+NZXT Kraken Z63,NZXT,2024-12-13,219.99,nzxt-kraken-z63,Cooling, Liquid Cooler
+Cooler Master MasterLiquid ML240L,Cooler Master,2024-12-13,99.99,cooler-master-masterliquid-ml240l,Cooling, Liquid Cooler
+Thermalright Peerless Assassin 120,Thermalright,2024-12-13,59.99,thermalright-peerless-assassin-120,Cooling, Air Cooler
+Corsair Hydro Series H115i, Corsair, 2024-12-13, 179.99,corsair-hydro-series-h115i,Cooling, Liquid Cooler
+Arctic Liquid Freezer II 280,Arctic,2024-12-13,159.99,arctic-liquid-freezer-ii-280,Cooling, Liquid Cooler
+Noctua NH-L9a-AM4,Noctua,2024-12-13,39.99,noctua-nh-l9a-am4,Cooling, Air Cooler
+Cooler Master Hyper 212 Black Edition,Cooler Master,2024-12-13,49.99,cooler-master-hyper-212-black-edition,Cooling, Air Cooler
+DeepCool Gammaxx 400,DeepCool,2024-12-13,29.99,deepcool-gammaxx-400,Cooling, Air Cooler
+Corsair iCUE H100i RGB Pro XT,Corsair,2024-12-13,139.99,corsair-icue-h100i-rgb-pro-xt,Cooling, Liquid Cooler
+Fractal Design Meshify 2,Fractal Design,2024-12-13,149.99,fractal-design-meshify-2,Computer Case, 45.2
+Phanteks P400A Digital,Phanteks,2024-12-13,89.99,phanteks-p400a-digital,Computer Case, 46.8
+Lian Li PC-O11 Dynamic,Lian Li,2024-12-13,139.99,lian-li-pc-o11-dynamic,Computer Case, 46.7
+NZXT H510 Elite,NZXT,2024-12-13,169.99,nzxt-h510-elite,Computer Case, 46.0
+Corsair iCUE 4000X,Corsair,2024-12-13,109.99,corsair-icue-4000x,Computer Case, 44.5
+Cooler Master HAF 700 EVO,Cooler Master,2024-12-13,249.99,cooler-master-haf-700-evo,Computer Case, 57.1
+Fractal Design Define 7,Fractal Design,2024-12-13,169.99,fractal-design-define-7,Computer Case, 47.3
+Thermaltake Level 20 MT, Thermaltake, 2024-12-13, 109.99,thermaltake-level-20-mt,Computer Case, 49.2
+Be Quiet! Dark Base Pro 900,be quiet!,2024-12-13,229.99,be-quiet-dark-base-pro-900,Computer Case, 56.8
+Corsair 275R Airflow,Corsair,2024-12-13,79.99,corsair-275r-airflow,Computer Case, 44.0
+part_name, brand, date_posted, unit_price, slug, component_type, other_info
+MSI MAG B550 TOMAHAWK,MSI,2024-12-13,139.99,msi-mag-b550-tomahawk,Motherboard, ATX form factor
+ASRock Z590 Steel Legend,ASRock,2024-12-13,199.99,asrock-z590-steel-legend,Motherboard, ATX form factor
+Gigabyte B550 AORUS ELITE,Gigabyte,2024-12-13,159.99,gigabyte-b550-aorus-elite,Motherboard, ATX form factor
+ASUS ROG Crosshair VIII Hero,ASUS,2024-12-13,379.99,asus-rog-crosshair-viii-hero,Motherboard, ATX form factor
+MSI Z490 PRO WIFI,MSI,2024-12-13,179.99,msi-z490-pro-wifi,Motherboard, ATX form factor
+Gigabyte Z690 AORUS XTREME,Gigabyte,2024-12-13,699.99,gigabyte-z690-aorus-xtreme,Motherboard, E-ATX form factor
+ASRock B450M Pro4,ASRock,2024-12-13,79.99,asrock-b450m-pro4,Motherboard, Micro ATX form factor
+ASUS TUF Gaming Z690-Plus,ASUS,2024-12-13,249.99,asus-tuf-gaming-z690-plus,Motherboard, ATX form factor
+MSI MPG Z590 GAMING EDGE WIFI,MSI,2024-12-13,239.99,msi-mpg-z590-gaming-edge-wifi,Motherboard, ATX form factor
+Gigabyte Z590 AORUS MASTER,Gigabyte,2024-12-13,399.99,gigabyte-z590-aorus-master,Motherboard, ATX form factor
