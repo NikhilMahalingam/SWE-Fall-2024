@@ -84,14 +84,6 @@ CREATE TABLE IF NOT EXISTS Consists(
     FOREIGN KEY (order_id) REFERENCES Parts_Order(order_id) ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS Favorites(
-	favorite_id INTEGER PRIMARY KEY,
-	price_max FLOAT,
-    brand TEXT,
-    user_id INTEGER,
-    FOREIGN KEY (user_id) REFERENCES User_Account(user_id) ON DELETE CASCADE
-);
-
 INSERT INTO User_Account(name, password, email, isAdmin) VALUES('Alice', 'AlicePass', 'alice@example.com', 0);
 INSERT INTO User_Account(name, password, email, isAdmin) VALUES('Bob', 'BobPass', 'bob@example.com', 0);
 INSERT INTO User_Account(name, password, email, isAdmin) VALUES('Charlie', 'CharliePass', 'charlie@example.com', 0);
