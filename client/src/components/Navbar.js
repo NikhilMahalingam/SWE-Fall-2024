@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import '../assets/css/Navbar.css';
 import logo from '../assets/images/logo_transparent.png';
 
-function Navbar({ user }) {
+function Navbar({ user, onUserChange }) {
   return (
     <nav className="navbar">
       <div className="navbar-brand">
@@ -31,6 +31,10 @@ function Navbar({ user }) {
         : <Link to="/login" className="navbar-link">Login</Link>
         }
         </li>
+        {user 
+        ? <li><text className="navbar-link" onClick={() => {onUserChange(null);}}>Logout</text></li>
+        : <></>
+        }
       </ul>
     </nav>
   );
