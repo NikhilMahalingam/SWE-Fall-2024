@@ -6,7 +6,9 @@ import { createPaymentIntent } from './apiHandlers/stripeHandler.js';
 import 'dotenv/config';
 import cors from 'cors';
 import path from 'path';
+import bycryptjs from 'bcryptjs';
 
+//const bycryptjs = require('bcryptjs');
 
 const route = express();
 route.use(cors());
@@ -71,7 +73,7 @@ route.post('/create-payment-intent', async (req, res) => {
 
 route.post('/register', async (req, res) => {
   const { name, email, password } = req.body;
-
+  console.log(password); 
   if (!name || !email || !password) {
     res.status(400).json({ error: 'Bad email/password' });
     return;
@@ -96,10 +98,17 @@ route.post('/login', async (req, res) => {
   }
 
   try {
-    db.get("SELECT * FROM User_Account WHERE email = $email AND password = $password;", {$email: email, $password: password}, (err, row) => {
-      if (err) res.status(400).json({ error: process.env.DEBUG ? err.toString() : 'Failed' });
-      else if (!row) res.status(400).json({ error: process.env.DEBUG ? "No such username/password" : 'Failed' });
-      else res.status(200).json({user: row});
+    db.get("SELECT * FROM User_Account WHERE email = $email;", {$email: email}, (err, row) => {
+      if(row == null){
+        res.status(400).json({ error: process.env.DEBUG ? "No such username/password" : 'Failed' });
+        return;
+      }
+      checkPassword(password, row.password).then((isMatch) => {
+        if (err) res.status(400).json({ error: process.env.DEBUG ? err.toString() : 'Failed' });
+        else if (!row) res.status(400).json({ error: process.env.DEBUG ? "No such username/password" : 'Failed' });
+        else if (!(isMatch)) res.status(400).json({ error: process.env.DEBUG ? "Password is incorrect" : 'Failed' });
+        else res.status(200).json({user: row});
+      });   
     });
   } catch (err) {
     res.status(400).json({ error: process.env.DEBUG ? err.toString() : 'Failed' });
@@ -316,3 +325,12 @@ route.get("*", (req, res)=> {
   res.sendFile(path.resolve('..', 'client', 'build', 'index.html'));
 });
 
+async function checkPassword(password, hash) {
+  try{
+    const isMatch = await bycryptjs.compare(password, hash);
+    return isMatch;
+  }catch(error){
+    console.error('Error checking password:', error);
+    throw error;
+  }
+}
