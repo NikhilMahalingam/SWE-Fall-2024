@@ -1,20 +1,26 @@
+
+
 .Home {
-  text-align: center;
+  text-align: left;
   width: 100%;
   height: 100vh;
+  padding: 0;
+  overflow-x: hidden;
 }
 
 
 
 .Home-header {
-  
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: left;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
+  font-size: calc(5px + 2vmin);
   color: white;
+  margin-top: -170px;
+  overflow-x: hidden;
+
 }
 
 .Home-link {
@@ -23,10 +29,91 @@
 
 .home-p{
   color:white;
+  margin-top: 5px; 
+  margin-bottom: 5px; 
+  line-height: 1.1; 
 }
 
-.home-h1{
-  color:white;
+
+h1{
+  color:black;
+}
+
+.Home-header h1 {
+  color: white;
+  font-size: 5rem;
+  text-align: center;
+  margin-top: 180px;
+  overflow: hidden;
+  
+}
+
+.Home-header p{
+  color: white;
+  padding-left: 300px;
+  font-size: 1.3rem;
+  line-height: 0.4;
+
+}
+
+.Home-page-image {
+  width: 300px;
+  height: 250px;
+  margin-top: -200px;
+  padding-left: 800px;
+  overflow-x:hidden;
+}
+
+.Home-header h3 {
+  color: white;
+  text-align: center;
+  font-size: 2.0rem;
+  margin-bottom: 1px;
+}
+
+.Home-header h5 {
+  color: white;
+  text-align: center;
+  font-size: 1.2rem;
+  margin-top: 10px;
+
+}
+
+.Home-page-Laptop {
+  width: 130px;
+  height: 100px;
+  margin-top: 20px;
+  padding-left: 150px;
+  overflow-x: hidden;
+}
+
+.Home-page-GeForce {
+  width: 120px;
+  height: 110px;
+  padding-left: 150px;
+  overflow-x: hidden;
+}
+
+.Home-page-Ssd {
+  width: 110px;
+  height: 120px;
+  padding-left: 150px;
+  overflow-x: hidden;
+
+}
+
+.Home-page-Headphones {
+  width: 120px;
+  height: 120px;
+  padding-left: 150px;
+  overflow-x: hidden;
+}
+
+.Home-page-Controller {
+  width: 120px;
+  height: 120px;
+  padding-left: 150px;
+  overflow-x: hidden;
 }
 
 /* @keyframes Home-logo-spin {
