@@ -71,7 +71,7 @@ route.post('/create-payment-intent', async (req, res) => {
 
 route.post('/register', async (req, res) => {
   const { name, email, password } = req.body;
-
+  console.log(password); 
   if (!name || !email || !password) {
     res.status(400).json({ error: 'Bad email/password' });
     return;

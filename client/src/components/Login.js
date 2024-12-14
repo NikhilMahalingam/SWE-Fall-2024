@@ -67,4 +67,9 @@ function Login({user, onUserChange}) {
   );
 
 }
+
+async function comparePasword(password){ 
+  
+}
+
 export default Login;

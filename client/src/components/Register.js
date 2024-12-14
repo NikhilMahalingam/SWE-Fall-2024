@@ -22,9 +22,9 @@ function Register() {
     }
     try {
       const hashedPassword = await hashPassword(password);
-      console.log('Type of hashedPassword: ', typeof password);
+      console.log('Type of hashedPassword: ', typeof hashedPassword);
       console.log('Hashed password: ', hashedPassword);
-      await createUserWithEmailAndPassword(name, username, password);
+      await createUserWithEmailAndPassword(name, username, hashedPassword);
       alert('Account created successfully');
       navigate('/login');
     } catch (error) {
