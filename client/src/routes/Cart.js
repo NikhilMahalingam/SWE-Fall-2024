@@ -35,16 +35,27 @@ function Cart({ cart, onCartChange }) {
     setShowCheckout(true);
   };
 
+
+  const totalPrice = cart.reduce((sum, part) => {
+    return sum + (part.unit_price || 0);
+  }, 0);
+
   return (
-    <div>
+    <div style={{ textAlign: 'center', marginTop: '2rem' }}>
       <h1>Your Cart</h1>
-      {cart.map((part, idx) => (
-          <li key={idx}>
+      <ul style={{ listStyle: 'none', padding: 0 }}>
+        {cart.map((part, idx) => (
+          <li key={idx} style={{ marginBottom: '0.5rem' }}>
             {part.part_name} - ${part.unit_price}
           </li>
         ))}
-      <button onClick={handleCheckoutClick}>Checkout</button>
+      </ul>
 
+      <p style={{ fontWeight: 'bold', marginTop: '1rem' }}>
+        Total: ${totalPrice.toFixed(2)}
+      </p>
+
+      <button onClick={handleCheckoutClick}>Checkout</button>
       {showCheckout && stripePromise && (
         <Elements stripe={stripePromise}>
           <CheckoutForm />
