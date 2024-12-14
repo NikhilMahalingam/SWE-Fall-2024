@@ -30,6 +30,7 @@ export let createUserWithEmailAndPassword = async (name, email, password) => {
         throw new Error();
       }
     });
+    console.log('Password: ', password);
 }
 
 export let signInWithEmailAndPassword = async (email, password) => {
