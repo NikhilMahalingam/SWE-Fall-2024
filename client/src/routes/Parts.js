@@ -117,7 +117,10 @@ const Parts = ({ cart, onCartChange, user, setCart }) => {
               <div className="part-price">${part.unit_price}</div>
               <button
                 className="buy-button"
-                onClick={() => handleBuyClick(part)}
+                onClick={() => {
+                  console.log("Button got clicked: part_id is " + part.part_id);
+                  handleBuyClick(part)
+                }}
               >
                 Add to Cart
               </button>
