@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import '../assets/css/Navbar.css';
 import logo from '../assets/images/logo_transparent.png';
 
-function Navbar() {
+function Navbar({ user }) {
   return (
     <nav className="navbar">
       <div className="navbar-brand">
@@ -26,7 +26,10 @@ function Navbar() {
           <Link to="/cart" className="navbar-link">Cart</Link>
         </li>
         <li>
-          <Link to="/login" className="navbar-link">Login</Link>
+        {user 
+        ? <text className="navbar-link">Welcome, {user.name}</text>
+        : <Link to="/login" className="navbar-link">Login</Link>
+        }
         </li>
       </ul>
     </nav>

@@ -13,7 +13,7 @@
 // const app = initializeApp(firebaseConfig);
 // const auth = getAuth(app);
 
-export let createUserWithEmailAndPassword = async (email, password) => {
+export let createUserWithEmailAndPassword = async (name, email, password) => {
   return fetch("/register", {
       method: "POST",
       headers: {
@@ -21,7 +21,7 @@ export let createUserWithEmailAndPassword = async (email, password) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        name: email,
+        name: name ,
         password,
         email
       })
@@ -47,10 +47,12 @@ export let signInWithEmailAndPassword = async (email, password) => {
     }).then((resp) => {
       // console.log(resp.status);
       if (resp.status >= 400) {
-        throw new Error();
+        throw new Error(resp.json().error);
       } else if (resp.status === 200) {
-        resp.json().then((obj) => {auth.currentUser = obj.user;});
+        return resp.json().then((obj) => obj.user);
         // auth.currentUser = body.user;
+      } else {
+        throw new Error("WHAT THE FUCK");
       }
     });
 }

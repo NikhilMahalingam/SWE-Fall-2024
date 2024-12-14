@@ -1,10 +1,10 @@
 // Login.js
 import React, { useState } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
-import { auth, signInWithEmailAndPassword } from 'firebase/auth';
+import { auth, signInWithEmailAndPassword } from '../auth.js';
 import '../assets/css/Login.css';
 
-function Login() {
+function Login({user, onUserChange}) {
   const [username, setUsername] = useState(''); 
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -20,8 +20,7 @@ function Login() {
     setError('');
 
     try {
-      await signInWithEmailAndPassword(username, password); 
-      // console.log(auth.currentUser);
+      onUserChange(await signInWithEmailAndPassword(username, password)); 
       navigate(from, { replace: true }); // Redirect to the intended route
     } catch (error) {
       setError(error.message || 'Login failed. Please try again.');
@@ -59,6 +58,7 @@ function Login() {
           </div>
           <button type="submit">Login</button>
         </form>
+        {error ? <p>Error: {error}</p>: <></>}
         <p>
           New user? <Link to="/register">Create an account</Link>
         </p>
