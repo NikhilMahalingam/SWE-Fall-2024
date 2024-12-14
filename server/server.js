@@ -79,10 +79,16 @@ route.post('/register', async (req, res) => {
     return;
   }
 
+  if (!email.match(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/)) {
+    res.status(400).json({ error: 'Email not in proper format' });
+    return;
+  }
+
   try {
     db.run("INSERT INTO User_Account (name, password, email, isAdmin) VALUES ($name, $password, $email, 0);", {$name: name, $email: email, $password: password}, function (err) {
       if (err) throw err;
-      res.status(201).json({id: this.lastID});
+      if (!this.changes) res.status(400).json({ error: 'Bad email/password' });
+      else res.status(201).json({id: this.lastID});
     });
   } catch (err) {
     res.status(400).json({ error: process.env.DEBUG ? err.toString() : 'Failed' });

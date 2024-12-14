@@ -28,7 +28,7 @@ export let createUserWithEmailAndPassword = async (name, email, password) => {
       })
     }).then((resp) => {
       if (resp.status >= 400) {
-        throw new Error();
+        throw new Error(resp.json().error);
       }
     });
     //console.log('Password: ', password);
