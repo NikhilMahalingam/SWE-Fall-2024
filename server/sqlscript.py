@@ -30,7 +30,7 @@ def import_csv_to_databse(csv_file):
             header = next(csv_reader)
             row_number = 0
 
-            sqlite_insert_query = """INSERT INTO Computer_Part(part_name, brand, date_posted, unit_price, slug, component_type, other_info) VALUES (?, ?, ?, ?, ?, ?, ?)"""
+            sqlite_insert_query = """INSERT INTO Computer_Part(part_name, brand, date_posted, unit_price, slug) VALUES (?, ?, ?, ?, ?, ?, ?)"""
 
 
             cpu_insert_query ="""INSERT INTO Cpu(part_id, cores) VALUES (?, ?)"""
