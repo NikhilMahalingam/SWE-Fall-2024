@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS User_Account(
-	user_id INTEGER PRIMARY KEY,
+	user_id INTEGER PRIMARY KEY AUTOINCREMENT,
 	name TEXT NOT NULL,
     password TEXT NOT NULL,
     email TEXT NOT NULL,
@@ -10,10 +10,11 @@ CREATE TABLE IF NOT EXISTS Computer_Part(
 	part_id INTEGER PRIMARY KEY,
     part_name TEXT NOT NULL,
     brand TEXT NOT NULL,
-    size FLOAT NOT NULL,
     date_posted DATETIME NOT NULL,
     unit_price FLOAT NOT NULL,
-    slug TEXT NULL
+    slug TEXT NULL, 
+    component_type TEXT NOT NULL, 
+    other_info TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS Cpu(
@@ -24,7 +25,7 @@ CREATE TABLE IF NOT EXISTS Cpu(
 
 CREATE TABLE IF NOT EXISTS Storage_Device(
 	part_id INTEGER PRIMARY KEY,
-    memory INTEGER NOT NULL,
+    memory TEXT NOT NULL,
     FOREIGN KEY (part_id) REFERENCES Computer_Part(part_id) ON DELETE CASCADE
 );
 
