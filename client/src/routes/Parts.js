@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { listPart } from '../api';
 import '../assets/css/Parts.css';
 
-const Parts = ({ cart, onCartChange }) => {
+const Parts = ({ cart, onCartChange, user, setCart }) => {
   const [parts, setParts] = useState([]);
   const [filteredParts, setFilteredParts] = useState([]);
   const [error, setError] = useState(null);
@@ -10,7 +10,7 @@ const Parts = ({ cart, onCartChange }) => {
   const [selectedComponentType, setSelectedComponentType] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Fetch parts from the API
+
   useEffect(() => {
     const fetchParts = async () => {
       try {
@@ -37,11 +37,26 @@ const Parts = ({ cart, onCartChange }) => {
     return `${baseURL}${slug}.jpg`;
   };
 
-  // THIS is where we actually add the item to the cart:
+
   const handleBuyClick = (part) => {
-    console.log(`Adding ${part.part_name} to the cart.`);
-    const updatedCart = [...cart, part];
-    onCartChange(updatedCart);
+    console.log(`Adding ${part.part_name} to the cart (server).`);
+    fetch('http://localhost:8000/cart/add', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id: user.user_id, part_id: part.part_id })
+    })
+      .then(response => response.json())
+      .then(data => {
+        console.log("Server response from cart/add:", data);
+
+        if (data.success) {
+          fetch(`http://localhost:8000/cart?user_id=${user.user_id}`)
+            .then(res => res.json())
+            .then(updatedCart => setCart(updatedCart))
+            .catch(console.error);
+        }
+      })
+      .catch(err => console.error("Error adding to cart:", err));
   };
 
   const componentTypes = [
@@ -104,7 +119,7 @@ const Parts = ({ cart, onCartChange }) => {
                 className="buy-button"
                 onClick={() => handleBuyClick(part)}
               >
-                Buy
+                Add to Cart
               </button>
             </div>
           </li>

@@ -71,6 +71,123 @@ route.post('/create-payment-intent', async (req, res) => {
   }
 });
 
+//cart endpoints
+route.get('/cart', (req, res) => {
+  const { user_id } = req.query;
+  if (!user_id) return res.status(400).json({ error: "Missing user_id" });
+
+  const findOrderSql = `
+    SELECT order_id FROM Parts_Order 
+    WHERE user_id = $user_id AND status = 'In Cart'
+    ORDER BY order_id DESC LIMIT 1
+  `;
+  db.get(findOrderSql, { $user_id: user_id }, (err, orderRow) => {
+    if (err) return res.status(500).json({ error: err.message });
+
+    if (!orderRow) {
+   
+      return res.json([]); 
+    }
+
+    const sql = `
+      SELECT Computer_Part.part_id, Computer_Part.part_name, 
+             Computer_Part.brand, Computer_Part.unit_price,
+             Consists.quantity
+      FROM Consists
+      INNER JOIN Computer_Part ON Consists.part_id = Computer_Part.part_id
+      WHERE Consists.order_id = $order_id
+    `;
+    db.all(sql, { $order_id: orderRow.order_id }, (err2, rows) => {
+      if (err2) return res.status(500).json({ error: err2.message });
+      res.json(rows);
+    });
+  });
+});
+
+route.post('/cart/add', (req, res) => {
+  const { user_id, part_id } = req.body;
+  if (!user_id || !part_id) {
+    return res.status(400).json({ error: "Missing user_id or part_id." });
+  }
+  const findOrderSql = `
+    SELECT order_id FROM Parts_Order 
+    WHERE user_id = $user_id AND status = 'In Cart'
+    ORDER BY order_id DESC LIMIT 1
+  `;
+  db.get(findOrderSql, { $user_id: user_id }, (err, orderRow) => {
+    if (err) return res.status(500).json({ error: err.message });
+
+    if (!orderRow) {
+  
+      const createOrderSql = `
+        INSERT INTO Parts_Order (date, status, user_id)
+        VALUES (datetime('now'), 'In Cart', $user_id)
+      `;
+      db.run(createOrderSql, { $user_id: user_id }, function(err2) {
+        if (err2) return res.status(500).json({ error: err2.message });
+        const newOrderId = this.lastID;
+        addOrUpdateConsists(newOrderId, part_id, 1, res);
+      });
+    } else {
+      addOrUpdateConsists(orderRow.order_id, part_id, 1, res);
+    }
+  });
+});
+
+function addOrUpdateConsists(order_id, part_id, quantity, res) {
+  const checkConsistsSql = `
+    SELECT quantity FROM Consists 
+    WHERE order_id = $order_id AND part_id = $part_id
+  `;
+  db.get(checkConsistsSql, { $order_id: order_id, $part_id: part_id }, (err, row) => {
+    if (err) return res.status(500).json({ error: err.message });
+
+    if (row) {
+
+      const newQuantity = row.quantity + quantity;
+      db.run(
+        "UPDATE Consists SET quantity = $quantity WHERE order_id = $order_id AND part_id = $part_id",
+        { $quantity: newQuantity, $order_id: order_id, $part_id: part_id },
+        function (err2) {
+          if (err2) return res.status(500).json({ error: err2.message });
+          res.json({ success: true, message: 'Quantity updated' });
+        }
+      );
+    } else {
+      db.run(
+        "INSERT INTO Consists (part_id, order_id, quantity) VALUES ($part_id, $order_id, $quantity)",
+        { $part_id: part_id, $order_id: order_id, $quantity: quantity },
+        function (err2) {
+          if (err2) return res.status(500).json({ error: err2.message });
+          res.json({ success: true, message: 'Part added to cart' });
+        }
+      );
+    }
+  });
+}
+
+
+
+route.post('/cart/checkout', (req, res) => {
+  const { user_id } = req.body;
+  if (!user_id) return res.status(400).json({ error: "Missing user_id" });
+
+  // Mark the "In Cart" order as 'Completed'
+  const sql = `
+    UPDATE Parts_Order
+    SET status = 'Completed'
+    WHERE user_id = $user_id AND status = 'In Cart'
+  `;
+  db.run(sql, { $user_id: user_id }, function (err) {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json({ success: true, message: 'Cart checked out' });
+  });
+});
+
+
+
+
+
 route.post('/register', async (req, res) => {
   const { name, email, password } = req.body;
   console.log(password); 
