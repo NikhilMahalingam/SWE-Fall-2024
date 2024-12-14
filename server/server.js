@@ -260,7 +260,7 @@ route.listen(port, () => {
 //and search within the filtered results
 route.get('/listpart', async (req, res) => {
   const{searchQuery, componentType, componentAttribute} = req.query;
-  let query = 'SELECT part_name, brand, unit_price, slug FROM Computer_Part';
+  let query = 'SELECT part_id, part_name, brand, unit_price, slug FROM Computer_Part';
 
   if (componentType) {
     switch (componentType) {
