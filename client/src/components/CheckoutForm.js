@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 
-const CheckoutForm = () => {
+const CheckoutForm = ({ clientSecret }) => {  // Accept clientSecret as a prop
   const stripe = useStripe();
   const elements = useElements();
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentMessage, setPaymentMessage] = useState('');
-  
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!stripe || !elements) {
@@ -16,7 +16,9 @@ const CheckoutForm = () => {
 
     setIsProcessing(true);
     const card = elements.getElement(CardElement);
-    const result = await stripe.confirmCardPayment( {
+
+    // Pass the clientSecret to confirmCardPayment
+    const result = await stripe.confirmCardPayment(clientSecret, {
       payment_method: {
         card: card,
       },
@@ -24,10 +26,8 @@ const CheckoutForm = () => {
 
     if (result.error) {
       setPaymentMessage(`Payment failed: ${result.error.message}`);
-    } else {
-      if (result.paymentIntent.status === 'succeeded') {
-        setPaymentMessage('Payment successful!');
-      }
+    } else if (result.paymentIntent.status === 'succeeded') {
+      setPaymentMessage('Payment successful!');
     }
 
     setIsProcessing(false);

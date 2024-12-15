@@ -85,9 +85,9 @@ function Cart({ user, cart, onCartChange }) {
 
       {showCheckout && clientSecret && (
         <Elements stripe={stripePromise} options={{ clientSecret }}>
-          <CheckoutForm />
+          <CheckoutForm clientSecret={clientSecret} /> 
         </Elements>
-      )}
+)}
     </div>
   );
 }
