@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { generatePCBuild, checkPartAvailability, fetchPartIdByName } from '../api';
 import '../assets/css/Chatbot.css';
 
-const Chatbot = ({ user, setCart }) => {
+const Chatbot = ({ user, onUserChange, cart, onCartChange }) => {
   const [description, setDescription] = useState('');
   const [output, setOutput] = useState('');
   const [pcBuild, setPcBuild] = useState(null);
@@ -72,7 +72,7 @@ const Chatbot = ({ user, setCart }) => {
         // Re-fetch cart data to update the state
         const updatedCartResponse = await fetch(`http://localhost:8000/cart?user_id=${user.user_id}`);
         const updatedCart = await updatedCartResponse.json();
-        setCart(updatedCart);
+        onCartChange(updatedCart);
       } else {
         console.error('Failed to add item to cart:', result.error);
       }
@@ -105,8 +105,7 @@ const Chatbot = ({ user, setCart }) => {
       {error && <p className="chatbot-error">{error}</p>}
       {output && (
         <div className="chatbot-output">
-          <h2>Raw Output</h2>
-          <pre>{output}</pre>
+          <h2></h2>
         </div>
       )}
       {pcBuild && (
