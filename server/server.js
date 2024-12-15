@@ -442,24 +442,29 @@ route.get('/listprebuilt', (req, res) => {
         res.status(500).json({ error: "Database error", details: err.message });
         return;
       }
-      let preBuilds = [];
-      let parts = [];
-      rows.map(row => {
-        const pBuild = {
-          build_id: row.build_id,
-          build_name: row.build_name,
-          build_price: row.build_price,
-          parts: [],
-        };
-        parts.push({
-          brand: row.brand, 
-          component_type: row.component_type,
-          date_posted: row.date_posted,
+      console.log(rows);
+      let preBuilds = {};
+      for (const row of rows) {
+        const id = `${row.build_id}`;
+        if (!preBuilds[id]) {
+          preBuilds[id] = {
+            build_id: row.build_id,
+            build_name: row.build_name,
+            parts: [],
+            build_price: 0,
+          };
+        }
+        preBuilds[id].parts.push({
           part_id: row.part_id,
-          part_name: row.part_name
+          part_name: row.part_name,
+          unit_price: row.unit_price
         });
+        preBuilds[id].build_price += row.unit_price;
+      }
+      console.log(preBuilds);
+      res.status(200).json(preBuilds);
       });
-      res.status(200).json(rows);
+      
       // console.log(rows);
       // preBuildWithParts = rows.map((row) => {
       //   let parts = null;
@@ -484,7 +489,6 @@ route.get('/listprebuilt', (req, res) => {
       //   console.log("After appending parts", preBuildWithParts);
       //   res.status(200).json(preBuildWithParts);
       // }, 1000);
-    });
   } catch (error) {
     res.status(500).json({ error: "Server error", details: error.message });
   }
