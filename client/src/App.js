@@ -11,7 +11,6 @@ import AppRoutes from './routes/AppRoutes';
 function App() {
   let [cart, setCart] = useState([]);
   const [user, setUser] = useState(() => {
-    // Restore user from localStorage on app load
     const savedUser = localStorage.getItem('user');
     return savedUser ? JSON.parse(savedUser) : null;
   });
@@ -39,7 +38,7 @@ function App() {
   return (
     <Router>
       <div className="App">
-        <Navbar user={user}/>
+        <Navbar user={user} onUserChange={handleLogout}/>
         
           <AppRoutes cart={cart} user={user} onUserChange={setUser} onCartChange={setCart} />
           {/* <Route path="/login" element={<Login />} />

@@ -79,6 +79,14 @@ export async function generatePCBuild(description) {
   }
 }
 
+export const fetchPartIdByName = async (partName) => {
+  const response = await fetch(`http://localhost:8000/get-part-id?part_name=${encodeURIComponent(partName)}`);
+  if (!response.ok) {
+    throw new Error('Failed to fetch part ID');
+  }
+  return response.json();
+};
+
 export async function checkPartAvailability(partName) {
   try {
     const response = await fetch(

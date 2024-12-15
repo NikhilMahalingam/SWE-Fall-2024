@@ -6,14 +6,36 @@ import { createPaymentIntent } from './apiHandlers/stripeHandler.js';
 import 'dotenv/config';
 import cors from 'cors';
 import path from 'path';
-import bycryptjs from 'bcryptjs';
+import bcryptjs from 'bcryptjs'; // Corrected typo
+import jwt from 'jsonwebtoken';
+import cookieParser from 'cookie-parser';
+import session from 'express-session';
 import { sleep } from 'openai/core.mjs';
 
 const route = express();
 route.use(cors());
+route.use(cookieParser());
+route.use(express.json());
+route.use(
+  session({
+    secret: 'JWT_SECRET', // Use a strong secret key
+    resave: false, // Prevents resaving session if it's not modified
+    saveUninitialized: false, // Don't save sessions that are not initialized
+    cookie: {
+      httpOnly: true, // Ensures cookies can't be accessed via JavaScript
+      maxAge: 1000 * 60 * 60 * 24, // Cookie expiration (1 day)
+    },
+  })
+);
+
 sqlite3.verbose();
 let db = new sqlite3.Database(process.env.Database ?? 'database.db');
 console.log("Using database file:", process.env.Database ?? 'database.db');
+
+// Ensure JWT_SECRET is set
+if (!process.env.JWT_SECRET) {
+  throw new Error('JWT_SECRET is not set in environment variables');
+}
 
 // Function to initiate the SQLite database connection
 function initiateDBConnection() {
@@ -43,6 +65,18 @@ function initiateDBConnection() {
 route.use(express.json());
 route.use(express.urlencoded({ extended: true }));
 route.use(express.static("../client/build"));
+
+// Middleware to verify JWT token
+function authenticateToken(req, res, next) {
+  const token = req.cookies.token;
+  if (!token) return res.sendStatus(401);
+
+  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+    if (err) return res.sendStatus(403);
+    req.user = user;
+    next();
+  });
+}
 
 // Routes
 route.post('/generate-pc-build', async (req, res) => {
@@ -198,6 +232,19 @@ route.delete('/cart/remove', (req, res) => {
 });
 
 
+route.get('/get-part-id', (req, res) => {
+  const { part_name } = req.query;
+  if (!part_name) {
+    return res.status(400).json({ error: 'Part name is required.' });
+  }
+
+  const sql = `SELECT part_id FROM Computer_Part WHERE part_name LIKE $part_name LIMIT 1`;
+  db.get(sql, { $part_name: `%${part_name}%` }, (err, row) => {
+    if (err) return res.status(500).json({ error: err.message });
+    if (!row) return res.status(404).json({ error: 'Part not found.' });
+    res.json({ part_id: row.part_id });
+  });
+});
 
 
 
@@ -213,17 +260,20 @@ route.post('/register', async (req, res) => {
     res.status(400).json({ error: 'Email not in proper format' });
     return;
   }
-
-  try {
-    db.run("INSERT INTO User_Account (name, password, email, isAdmin) VALUES ($name, $password, $email, 0);", {$name: name, $email: email, $password: password}, function (err) {
-      if (err) throw err;
-      if (!this.changes) res.status(400).json({ error: 'Bad email/password' });
+  hashPassword(password).then((hash) => {
+    try{ 
+      db.run("INSERT INTO User_Account (name, password, email, isAdmin) VALUES ($name, $password, $email, 0);", {$name: name, $email: email, $password: hash}, function (err) {
+        if (err) throw err;
+        if (!this.changes) res.status(400).json({ error: 'Bad email/password' });
       else res.status(201).json({id: this.lastID});
-    });
-  } catch (err) {
-    res.status(400).json({ error: process.env.DEBUG ? err.toString() : 'Failed' });
-  }
+      });
+    } catch (err) {
+      res.status(400).json({ error: process.env.DEBUG ? err.toString() : 'Failed' });
+    }
+  }); 
 });
+
+
 
 route.post('/login', async (req, res) => {
   const {email, password } = req.body;
@@ -232,6 +282,8 @@ route.post('/login', async (req, res) => {
     res.status(400).json({ error: 'Bad email/password' });
     return;
   }
+
+
 
   try {
     db.get("SELECT * FROM User_Account WHERE email = $email;", {$email: email}, (err, row) => {
@@ -243,12 +295,23 @@ route.post('/login', async (req, res) => {
         if (err) res.status(400).json({ error: process.env.DEBUG ? err.toString() : 'Failed' });
         else if (!row) res.status(400).json({ error: process.env.DEBUG ? "No such username/password" : 'Failed' });
         else if (!(isMatch)) res.status(400).json({ error: process.env.DEBUG ? "Password is incorrect" : 'Failed' });
-        else res.status(200).json({user: row});
+        else {
+          const user = { id: row.id, email: row.email };
+          const token = jwt.sign(user, process.env.JWT_SECRET, { expiresIn: '1h' });
+          req.session.user = user;
+          res.cookie('token', token, { httpOnly: true });
+          res.status(200).json({ user: row });
+        }
       });   
     });
   } catch (err) {
     res.status(400).json({ error: process.env.DEBUG ? err.toString() : 'Failed' });
   }
+});
+
+// Example of a protected route
+route.get('/cart', authenticateToken, (req, res) => {
+  res.status(200).json({ message: 'This is a protected route', user: req.user });
 });
 
 // Start the server
@@ -411,10 +474,24 @@ route.get("*", (req, res)=> {
 
 async function checkPassword(password, hash) {
   try{
-    const isMatch = await bycryptjs.compare(password, hash);
+    const isMatch = await bcryptjs.compare(password, hash); 
     return isMatch;
   }catch(error){
     console.error('Error checking password:', error);
     throw error;
+  }
+}
+
+async function hashPassword(password){ 
+  const saltRounds = 10; 
+  try {
+    const hash = await bcryptjs.hash(password, saltRounds); 
+    if (typeof hash !== 'string') {
+      throw new Error('Hash is not a string');
+    }
+    return hash;
+  } catch (error) {
+    console.error('Error hashing password:', error);
+    throw error; 
   }
 }
