@@ -217,7 +217,7 @@ function addOrUpdateConsists(order_id, part_id, quantity, res) {
   });
 }
 
-route.delete('/cart/remove', (req, res) => {
+route.patch('/cart/remove', (req, res) => {
   const { user_id, part_id } = req.body;
 
   if (!user_id || !part_id) {
