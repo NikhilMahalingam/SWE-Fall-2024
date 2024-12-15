@@ -119,8 +119,12 @@ const Parts = ({ cart, onCartChange, user }) => {
               <button
                 className="buy-button"
                 onClick={() => {
-                  console.log("Button got clicked: part_id is " + part.part_id);
-                  handleBuyClick(part)
+                  if (user == null) {
+                    alert("You are not logged in, please login to add to cart.");
+                  } else {
+                    handleBuyClick(part);
+                    alert("Part added to cart!");
+                  }
                 }}
               >
                 Add to Cart

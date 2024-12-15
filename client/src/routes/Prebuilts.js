@@ -2,7 +2,7 @@ import React, {useState, useEffect} from 'react';
 import { listPreBuilts } from '../api';
 import '../assets/css/Prebuilts.css';
 
-const Prebuilts = ({ cart, onCartChange }) => {
+const Prebuilts = ({ cart, onCartChange, user }) => {
   const [prebuilts, setPrebuilts] = useState([]);
   const [error, setError] = useState(null);
 
@@ -20,6 +20,27 @@ const Prebuilts = ({ cart, onCartChange }) => {
     fetchPrebuilts();
   }, []);
 
+  const handleBuyClick = (part) => {
+    console.log(`Adding ${part.part_name} to the cart (server).`);
+    fetch('http://localhost:8000/cart/add', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id: user.user_id, part_id: part.part_id })
+    })
+      .then(response => response.json())
+      .then(data => {
+        console.log("Server response from cart/add:", data);
+
+        if (data.success) {
+          fetch(`http://localhost:8000/cart?user_id=${user.user_id}`)
+            .then(res => res.json())
+            .then(updatedCart => onCartChange(updatedCart))
+            .catch(console.error);
+        }
+      })
+      .catch(err => console.error("Error adding to cart:", err));
+  };
+
   const getAWSImageURL = (slug) => {
     const baseURL = 'https://pccomposer.s3.amazonaws.com/';
     return `${baseURL}${slug}.jpg`;
@@ -28,7 +49,7 @@ const Prebuilts = ({ cart, onCartChange }) => {
   console.log(prebuilts);
   return (
     <div className="prebuilts-container">
-      <h1 className="prebuilts-title">Prebuilts List</h1>
+      <h1 className="prebuilts-title">Pre-builts List</h1>
       {error && <p style={{ color: 'red' }}>{error}</p>}
       <ul className="prebuilts-list">
         {Object.values(prebuilts).map((prebuild, index) => (
@@ -49,7 +70,16 @@ const Prebuilts = ({ cart, onCartChange }) => {
             </div>
             <button 
                 className="buy-button"
-                onClick={() => {}}>
+                onClick={() => {
+                  if (user == null) {
+                    alert("You are not logged in, please login to add to cart.");
+                  } else {
+                    for (const part of prebuild.parts) {
+                      handleBuyClick(part);
+                    }
+                    alert("Pre-built added to cart!");
+                  }
+                }}>
                 Buy
             </button>
           </li>
