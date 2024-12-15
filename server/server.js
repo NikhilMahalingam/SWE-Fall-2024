@@ -223,6 +223,19 @@ route.patch('/cart/remove', (req, res) => {
 });
 
 
+route.get('/get-part-id', (req, res) => {
+  const { part_name } = req.query;
+  if (!part_name) {
+    return res.status(400).json({ error: 'Part name is required.' });
+  }
+
+  const sql = `SELECT part_id FROM Computer_Part WHERE part_name LIKE $part_name LIMIT 1`;
+  db.get(sql, { $part_name: `%${part_name}%` }, (err, row) => {
+    if (err) return res.status(500).json({ error: err.message });
+    if (!row) return res.status(404).json({ error: 'Part not found.' });
+    res.json({ part_id: row.part_id });
+  });
+});
 
 
 
