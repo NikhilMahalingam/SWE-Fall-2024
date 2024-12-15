@@ -18,13 +18,14 @@ function Login({user, onUserChange}) {
     setError('');
 
     try {
-      onUserChange(await signInWithEmailAndPassword(username, password)); 
-      navigate(from, { replace: true }); // Redirect to the intended route
+      const userData = await signInWithEmailAndPassword(username, password);
+      localStorage.setItem('user', JSON.stringify(userData));
+      onUserChange(userData);
+      navigate(from, { replace: true });
     } catch (error) {
       setError(error.message || 'Login failed. Please try again.');
     }
   };
-
 
   return (
     <div className="login-page">
