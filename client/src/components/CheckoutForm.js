@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 
-const CheckoutForm = ({ clientSecret }) => {  // Accept clientSecret as a prop
+const CheckoutForm = ({ clientSecret, user, cart, onCartChange }) => {  // Accept clientSecret as a prop
   const stripe = useStripe();
   const elements = useElements();
   const [isProcessing, setIsProcessing] = useState(false);
@@ -27,7 +27,16 @@ const CheckoutForm = ({ clientSecret }) => {  // Accept clientSecret as a prop
     if (result.error) {
       setPaymentMessage(`Payment failed: ${result.error.message}`);
     } else if (result.paymentIntent.status === 'succeeded') {
-      setPaymentMessage('Payment successful!');
+      console.log(cart);
+      console.log({ user_id: user.user_id, order_id: cart.order_id });
+      const response = await fetch('http://localhost:8000/complete-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: user.user_id, order_id: cart.order_id })  
+      });
+      if (response.status === 200) {
+        setPaymentMessage('Payment successful!');
+      }
     }
 
     setIsProcessing(false);

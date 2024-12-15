@@ -116,7 +116,7 @@ route.post('/create-payment-intent', async (req, res) => {
 
   try {
     const paymentIntent = await createPaymentIntent(amount);
-    res.json({ clientSecret: paymentIntent.client_secret });
+    res.status(200).json({ clientSecret: paymentIntent.client_secret });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -137,7 +137,7 @@ route.get('/cart', (req, res) => {
 
     if (!orderRow) {
    
-      return res.json([]); 
+      return res.status(200).json([]); 
     }
 
     const sql = `
@@ -150,7 +150,8 @@ route.get('/cart', (req, res) => {
     `;
     db.all(sql, { $order_id: orderRow.order_id }, (err2, rows) => {
       if (err2) return res.status(500).json({ error: err2.message });
-      res.json(rows);
+      console.log({ parts: rows, order_id: orderRow.order_id});
+      res.status(200).json({ parts: rows, order_id: orderRow.order_id});
     });
   });
 });
@@ -201,7 +202,7 @@ function addOrUpdateConsists(order_id, part_id, quantity, res) {
         { $quantity: newQuantity, $order_id: order_id, $part_id: part_id },
         function (err2) {
           if (err2) return res.status(500).json({ error: err2.message });
-          res.json({ success: true, message: 'Quantity updated' });
+          res.status(200).json({ success: true, message: 'Quantity updated' });
         }
       );
     } else {
@@ -210,7 +211,7 @@ function addOrUpdateConsists(order_id, part_id, quantity, res) {
         { $part_id: part_id, $order_id: order_id, $quantity: quantity },
         function (err2) {
           if (err2) return res.status(500).json({ error: err2.message });
-          res.json({ success: true, message: 'Part added to cart' });
+          res.status(200).json({ success: true, message: 'Part added to cart' });
         }
       );
     }
@@ -262,7 +263,7 @@ route.patch('/cart/remove', (req, res) => {
           { $quantity: currentQuantity - 1, $order_id: orderRow.order_id, $part_id: part_id },
           function (err3) {
             if (err3) return res.status(500).json({ error: err3.message });
-            res.json({ success: true, message: 'Quantity decremented' });
+            res.status(200).json({ success: true, message: 'Quantity decremented' });
           }
         );
       } else {
@@ -272,7 +273,7 @@ route.patch('/cart/remove', (req, res) => {
         `;
         db.run(deleteSql, { $order_id: orderRow.order_id, $part_id: part_id }, function (err4) {
           if (err4) return res.status(500).json({ error: err4.message });
-          res.json({ success: true, message: 'Item removed from cart' });
+          res.status(200).json({ success: true, message: 'Item removed from cart' });
         });
       }
     });
@@ -290,7 +291,7 @@ route.get('/get-part-id', (req, res) => {
   db.get(sql, { $part_name: `%${part_name}%` }, (err, row) => {
     if (err) return res.status(500).json({ error: err.message });
     if (!row) return res.status(404).json({ error: 'Part not found.' });
-    res.json({ part_id: row.part_id });
+    res.status(200).json({ part_id: row.part_id });
   });
 });
 
@@ -582,6 +583,22 @@ route.get("*", (req, res)=> {
   res.sendFile(path.resolve('..', 'client', 'build', 'index.html'));
 });
 
+route.post('/complete-order', async (req, res) => {
+  const { user_id, order_id } = req.body;
+  if (!user_id || !order_id) {
+    return res.status(400).json({ error: "Missing user_id or part_id." });
+  }
+  try {
+    db.run("UPDATE Parts_Order SET status = 'Completed' WHERE user_id = $user_id AND order_id = $order_id", 
+      { $user_id: user_id, $order_id: order_id},
+      function (err2) {
+        if (err2) return res.status(500).json({ error: err2.message });
+        res.status(200).json({ success: true, message: 'Successfully completed order!' });
+      })
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error.'});
+  }
+})
 
 // function getCookie(cname) {
 //   var name = cname + "=";

@@ -11,7 +11,8 @@ function Cart({ user, cart, onCartChange }) {
   const [clientSecret, setClientSecret] = useState(null);
 
   console.log("User object in Cart:", user);
-  const totalPrice = cart.reduce((sum, part) => {
+  console.log(cart);
+  const totalPrice = cart.parts.reduce((sum, part) => {
     return sum + (part.unit_price * part.quantity);
   }, 0);
   const totalPriceInCents = Math.round(totalPrice * 100);
@@ -65,12 +66,15 @@ function Cart({ user, cart, onCartChange }) {
 
       <h1>Your Cart</h1>
       <ul style={{ listStyle: 'none', padding: 0 }}>
-        {cart.map((part, idx) => (
+        {cart.parts.map((part, idx) => (
           <li key={idx} style={{ marginBottom: '0.5rem' }}>
             {part.part_name} - ${part.unit_price} (Qty: {part.quantity})
             <button
               style={{ marginLeft: '1rem' }}
-              onClick={() => handleRemoveClick(part.part_id)}
+              onClick={() => {
+                console.log("Part id to be removed:", part.part_id);
+                handleRemoveClick(part.part_id)
+              }}
             >
               Remove
             </button>
@@ -85,7 +89,7 @@ function Cart({ user, cart, onCartChange }) {
 
       {showCheckout && clientSecret && (
         <Elements stripe={stripePromise} options={{ clientSecret }}>
-          <CheckoutForm clientSecret={clientSecret} /> 
+          <CheckoutForm clientSecret={clientSecret} user={user} cart={cart} /> 
         </Elements>
 )}
     </div>
