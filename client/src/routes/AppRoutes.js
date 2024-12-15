@@ -20,7 +20,7 @@ const AppRoutes = ({cart, user, onCartChange, onUserChange}) => {
       <Route path="/" element={<Home />} />
       <Route path="/cart" element={<Cart cart={cart} onCartChange={onCartChange}  user={user} onUserChange={onUserChange} />} />
       <Route path="/parts" element={<Parts cart={cart} onCartChange={onCartChange} user={user} onUserChange={onUserChange} />}/>
-      <Route path="/prebuilts" element={<Prebuilts cart={cart} onCartChange={onCartChange}/>} />
+      <Route path="/prebuilts" element={<Prebuilts cart={cart} onCartChange={onCartChange} user={user} onUserChange={onUserChange}/>} />
       <Route path="/chatbot" element={<Chatbot user={user} onUserChange={onUserChange}/>} />
     </Routes>
   );
