@@ -25,12 +25,13 @@ const Prebuilts = ({ cart, onCartChange }) => {
     return `${baseURL}${slug}.jpg`;
   };
 
+  console.log(prebuilts);
   return (
     <div className="prebuilts-container">
       <h1 className="prebuilts-title">Prebuilts List</h1>
       {error && <p style={{ color: 'red' }}>{error}</p>}
       <ul className="prebuilts-list">
-        {prebuilts.map((part, index) => (
+        {Object.values(prebuilts).map((prebuild, index) => (
           <li key={index} className="prebuilts-item">
             {/* <img
               src={getAWSImageURL(part.slug)}
@@ -38,8 +39,13 @@ const Prebuilts = ({ cart, onCartChange }) => {
               className="prebuilt-image"
             /> */}
             <div className="prebuilt-details">
-              <div className="prebuilt-name">{part.build_name}</div>
-              <div className="prebuilt-price">${part.build_price}</div>
+              <div className="prebuilt-name">{prebuild.build_name}</div>
+              <div className="prebuilt-price">${prebuild.build_price}</div>
+              <ul>
+                {prebuild.parts.map(part => 
+                  (<li>{part.part_name} - ${part.unit_price}</li>)
+                )}
+              </ul>
             </div>
             <button 
                 className="buy-button"
