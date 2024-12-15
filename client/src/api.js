@@ -78,3 +78,22 @@ export async function generatePCBuild(description) {
     throw error;
   }
 }
+
+export async function checkPartAvailability(partName) {
+  try {
+    const response = await fetch(
+      `http://localhost:8000/check-part-availability?partName=${encodeURIComponent(partName)}`
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.inStock;
+  } catch (error) {
+    console.error('Error checking part availability:', error.message);
+    throw error;
+  }
+}
+
