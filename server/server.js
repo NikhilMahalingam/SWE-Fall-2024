@@ -223,11 +223,13 @@ route.patch('/cart/remove', (req, res) => {
   if (!user_id || !part_id) {
     return res.status(400).json({ error: "Missing user_id or part_id." });
   }
+
   const findOrderSql = `
     SELECT order_id FROM Parts_Order 
     WHERE user_id = $user_id AND status = 'In Cart'
     ORDER BY order_id DESC LIMIT 1
   `;
+
   db.get(findOrderSql, { $user_id: user_id }, (err, orderRow) => {
     if (err) return res.status(500).json({ error: err.message });
 
@@ -235,16 +237,44 @@ route.patch('/cart/remove', (req, res) => {
       return res.status(400).json({ error: "No active cart found for user" });
     }
 
-    const deleteSql = `
-      DELETE FROM Consists
+    const checkQuantitySql = `
+      SELECT quantity FROM Consists
       WHERE order_id = $order_id AND part_id = $part_id
     `;
-    db.run(deleteSql, { $order_id: orderRow.order_id, $part_id: part_id }, function (deleteErr) {
-      if (deleteErr) return res.status(500).json({ error: deleteErr.message });
-      if (this.changes === 0) {
-        return res.status(400).json({ error: "Item not found in cart" });
+
+    db.get(checkQuantitySql, { $order_id: orderRow.order_id, $part_id: part_id }, (err2, row) => {
+      if (err2) return res.status(500).json({ error: err2.message });
+
+      if (!row) {
+        return res.status(400).json({ error: "Item not found in cart." });
       }
-      res.json({ success: true, message: 'Part removed from cart' });
+
+      const currentQuantity = row.quantity;
+
+      if (currentQuantity > 1) {
+        const updateQuantitySql = `
+          UPDATE Consists
+          SET quantity = $quantity
+          WHERE order_id = $order_id AND part_id = $part_id
+        `;
+        db.run(
+          updateQuantitySql,
+          { $quantity: currentQuantity - 1, $order_id: orderRow.order_id, $part_id: part_id },
+          function (err3) {
+            if (err3) return res.status(500).json({ error: err3.message });
+            res.json({ success: true, message: 'Quantity decremented' });
+          }
+        );
+      } else {
+        const deleteSql = `
+          DELETE FROM Consists
+          WHERE order_id = $order_id AND part_id = $part_id
+        `;
+        db.run(deleteSql, { $order_id: orderRow.order_id, $part_id: part_id }, function (err4) {
+          if (err4) return res.status(500).json({ error: err4.message });
+          res.json({ success: true, message: 'Item removed from cart' });
+        });
+      }
     });
   });
 });
