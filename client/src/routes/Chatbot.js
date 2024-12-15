@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { generatePCBuild } from '../api';
+import { generatePCBuild, checkPartAvailability } from '../api';
 import '../assets/css/Chatbot.css';
 
 const Chatbot = () => {
@@ -8,20 +8,28 @@ const Chatbot = () => {
   const [pcBuild, setPcBuild] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [availability, setAvailability] = useState({}); // Tracks part availability
 
   const handleGenerateBuild = async () => {
     setError(null);
     setOutput('');
     setPcBuild(null);
+    setAvailability({});
     setLoading(true);
 
     try {
       const { rawOutput, parsedPcBuild } = await generatePCBuild(description);
-      if(!parsedPcBuild){
-        setOutput(rawOutput);
-      } else { 
-        setPcBuild(parsedPcBuild); 
+      setOutput(rawOutput);
+      setPcBuild(parsedPcBuild);
+      const availabilityMap = {};
+      for (const [key, value] of Object.entries(parsedPcBuild)) {
+        const partName = `${value.Brand} ${value.Model}`;
+        console.log(value);
+        console.log(partName)
+        const inStock = await checkPartAvailability(partName);
+        availabilityMap[key] = inStock;
       }
+      setAvailability(availabilityMap);
     } catch (err) {
       setError('Failed to generate PC build. Please try again.');
     } finally {
@@ -56,11 +64,20 @@ const Chatbot = () => {
       )}
       {pcBuild && (
         <div className="chatbot-output">
-          <h2>PC Build</h2>
+          <h2>Parsed PC Build</h2>
           <ul>
             {Object.entries(pcBuild).map(([key, value]) => (
               <li key={key}>
                 <strong>{key}:</strong> {value.Brand} - {value.Model}
+                <div>
+                  {availability[key] === undefined ? (
+                    <p>Checking availability...</p>
+                  ) : availability[key] ? (
+                    <button className="chatbot-button">Add to Cart</button>
+                  ) : (
+                    <p>Out of Stock</p>
+                  )}
+                </div>
               </li>
             ))}
           </ul>

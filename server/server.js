@@ -385,8 +385,35 @@ route.get('/listprebuilt', (req, res) => {
     res.status(500).json({ error: "Server error", details: error.message });
   }
 });
-route.get("*", (req, res)=> {
-  res.sendFile(path.resolve('..', 'client', 'build', 'index.html'));
+
+route.get('/check-part-availability', async (req, res) => {
+  const { partName } = req.query; 
+
+  if (!partName) {
+    return res.status(400).json({ error: 'Missing part name in query.' });
+  }
+
+  try {
+    db.get(
+      'SELECT * FROM Computer_Part WHERE part_name = ?',
+      [partName],
+      (err, row) => {
+        if (err) {
+          console.error('Error querying database:', err.message);
+          return res.status(500).json({ error: 'Database query failed.' });
+        }
+
+        if (row) {
+          res.status(200).json({ inStock: true });
+        } else {
+          res.status(200).json({ inStock: false });
+        }
+      }
+    );
+  } catch (error) {
+    console.error('Error handling request:', error.message);
+    res.status(500).json({ error: 'Internal server error.' });
+  }
 });
 
 async function checkPassword(password, hash) {
@@ -398,3 +425,7 @@ async function checkPassword(password, hash) {
     throw error;
   }
 }
+
+route.get("*", (req, res) => {
+  res.sendFile(path.resolve(__dirname, 'client', 'build', 'index.html'));
+})
