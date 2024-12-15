@@ -164,12 +164,12 @@ function addOrUpdateConsists(order_id, part_id, quantity, res) {
   });
 }
 
-route.delete('/cart/remove', (req, res) => {
+route.patch('/cart/remove', (req, res) => {
   const { user_id, part_id } = req.body;
-
   if (!user_id || !part_id) {
     return res.status(400).json({ error: "Missing user_id or part_id." });
   }
+
   const findOrderSql = `
     SELECT order_id FROM Parts_Order 
     WHERE user_id = $user_id AND status = 'In Cart'
@@ -182,16 +182,42 @@ route.delete('/cart/remove', (req, res) => {
       return res.status(400).json({ error: "No active cart found for user" });
     }
 
-    const deleteSql = `
-      DELETE FROM Consists
+    // 1. Fetch the current quantity
+    const getConsistsSql = `
+      SELECT quantity FROM Consists
       WHERE order_id = $order_id AND part_id = $part_id
     `;
-    db.run(deleteSql, { $order_id: orderRow.order_id, $part_id: part_id }, function (deleteErr) {
-      if (deleteErr) return res.status(500).json({ error: deleteErr.message });
-      if (this.changes === 0) {
-        return res.status(400).json({ error: "Item not found in cart" });
+    db.get(getConsistsSql, { $order_id: orderRow.order_id, $part_id: part_id }, (err2, row) => {
+      if (err2) return res.status(500).json({ error: err2.message });
+      if (!row) return res.status(400).json({ error: "Item not found in cart" });
+
+      let newQuantity = row.quantity - 1;
+
+      if (newQuantity <= 0) {
+        // If quantity after decrement is 0, remove the row entirely
+        const deleteSql = `
+          DELETE FROM Consists 
+          WHERE order_id = $order_id AND part_id = $part_id
+        `;
+        db.run(deleteSql, { $order_id: orderRow.order_id, $part_id: part_id }, function(delErr) {
+          if (delErr) return res.status(500).json({ error: delErr.message });
+          return res.json({ success: true, message: 'Item removed from cart (quantity was 1).'});
+        });
+      } else {
+        // Otherwise, just decrement
+        const updateSql = `
+          UPDATE Consists SET quantity = $newQuantity
+          WHERE order_id = $order_id AND part_id = $part_id
+        `;
+        db.run(updateSql, {
+          $newQuantity: newQuantity,
+          $order_id: orderRow.order_id,
+          $part_id: part_id
+        }, function(updateErr) {
+          if (updateErr) return res.status(500).json({ error: updateErr.message });
+          res.json({ success: true, message: 'Quantity decremented', newQuantity });
+        });
       }
-      res.json({ success: true, message: 'Part removed from cart' });
     });
   });
 });

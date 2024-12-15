@@ -10,11 +10,13 @@ function Cart({ user, cart, onCartChange }) {
   const [showCheckout, setShowCheckout] = useState(false);
   const [clientSecret, setClientSecret] = useState(null);
 
-  // 1. Calculate total cart price
-  const totalPrice = cart.reduce((sum, part) => sum + (part.unit_price || 0), 0);
+  console.log("User object in Cart:", user);
+  const totalPrice = cart.reduce((sum, part) => {
+    return sum + (part.unit_price * part.quantity);
+  }, 0);
   const totalPriceInCents = Math.round(totalPrice * 100);
 
-  // 2. When user clicks Checkout, call your server endpoint for a PaymentIntent
+
   const handleCheckoutClick = async () => {
     try {
       const response = await fetch('http://localhost:8000/create-payment-intent', {
@@ -38,31 +40,24 @@ function Cart({ user, cart, onCartChange }) {
 
 
   const handleRemoveClick = async (part_id) => {
-    if (!user) {
-      console.error("User not logged in");
-      return;
-    }
-
-    try {
-      const response = await fetch('http://localhost:8000/cart/remove', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: user.user_id, part_id: part_id }),
-      });
-
-      const data = await response.json();
+    console.log("removing item:")
+    fetch('http://localhost:8000/cart/remove', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id: user.user_id, part_id })
+    })
+    .then(res => res.json())
+    .then(data => {
       if (data.success) {
-        // Re-fetch the cart or manually remove from local cart state:
         fetch(`http://localhost:8000/cart?user_id=${user.user_id}`)
-          .then((res) => res.json())
-          .then((updatedCart) => onCartChange(updatedCart))
+          .then(r => r.json())
+          .then(newCart => onCartChange(newCart))
           .catch(console.error);
       } else {
-        console.error('Remove failed:', data.error);
+        console.error("Failed to decrement:", data.error);
       }
-    } catch (error) {
-      console.error('Error removing item from cart:', error);
-    }
+    })
+    .catch(err => console.error("Error decrementing:", err));
   };
 
   return (

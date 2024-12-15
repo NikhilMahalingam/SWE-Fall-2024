@@ -15,7 +15,7 @@ function App() {
   return (
     <Router>
       <div className="App">
-        <Navbar user={user} onUserChange={setUser}/>
+        <Navbar user={user}/>
         
           <AppRoutes cart={cart} user={user} onUserChange={setUser} onCartChange={setCart} />
           {/* <Route path="/login" element={<Login />} />
