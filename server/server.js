@@ -11,6 +11,8 @@ import jwt from 'jsonwebtoken';
 import cookieParser from 'cookie-parser';
 import session from 'express-session';
 import { sleep } from 'openai/core.mjs';
+import { fileURLToPath } from 'url';
+
 
 const route = express();
 route.use(cors());
@@ -18,7 +20,7 @@ route.use(cookieParser());
 route.use(express.json());
 route.use(
   session({
-    secret: 'JWT_SECRET', // Use a strong secret key
+    secret: process.env.JWT_SECRET, // Use a strong secret key
     resave: false, // Prevents resaving session if it's not modified
     saveUninitialized: false, // Don't save sessions that are not initialized
     cookie: {
@@ -27,6 +29,8 @@ route.use(
     },
   })
 );
+
+
 
 sqlite3.verbose();
 let db = new sqlite3.Database(process.env.Database ?? 'database.db');
@@ -78,6 +82,20 @@ function authenticateToken(req, res, next) {
   });
 }
 
+function checkAuthenticated(req, res, next) {
+  const token = req.cookies.token;
+  if (token) {
+    jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+      if (err) {
+        return res.status(403).json({ error: err.message });
+      }
+      req.user = user;
+      return res.redirect('/'); // Redirect to home if already logged in
+    });
+  } else {
+    next();
+  }
+}
 // Routes
 route.post('/generate-pc-build', async (req, res) => {
   try {
@@ -273,6 +291,15 @@ route.post('/register', async (req, res) => {
   }); 
 });
 
+route.post('/logout', (req, res) => {
+  res.clearCookie('token');
+  res.status(200).json({ message: 'Logged out successfully' });
+});
+
+
+route.get('/login', checkAuthenticated, (req, res) => {
+  res.sendFile(path.resolve('..', 'client', 'build', 'index.html')); 
+});
 
 
 route.post('/login', async (req, res) => {
@@ -299,6 +326,7 @@ route.post('/login', async (req, res) => {
           const user = { id: row.id, email: row.email };
           const token = jwt.sign(user, process.env.JWT_SECRET, { expiresIn: '1h' });
           req.session.user = user;
+          //setCookie('user', user, 1); 
           res.cookie('token', token, { httpOnly: true });
           res.status(200).json({ user: row });
         }
@@ -309,10 +337,7 @@ route.post('/login', async (req, res) => {
   }
 });
 
-// Example of a protected route
-route.get('/cart', authenticateToken, (req, res) => {
-  res.status(200).json({ message: 'This is a protected route', user: req.user });
-});
+
 
 // Start the server
 const port = process.env.PORT || 8000;
@@ -495,3 +520,26 @@ async function hashPassword(password){
     throw error; 
   }
 }
+
+// function getCookie(cname) {
+//   var name = cname + "=";
+//   var decodedCookie = decodeURIComponent(document.cookie);
+//   var ca = decodedCookie.split(';');
+//   for(var i = 0; i <ca.length; i++) {
+//     var c = ca[i];
+//     while (c.charAt(0) == ' ') {
+//       c = c.substring(1);
+//     }
+//     if (c.indexOf(name) == 0) {
+//       return c.substring(name.length, c.length);
+//     }
+//   }
+//   return "";
+// }
+
+// function setCookie(cname, cvalue, exdays) {
+//   var d = new Date();
+//   d.setTime(d.getTime() + (exdays*24*60*60*1000));
+//   var expires = "expires="+ d.toUTCString();
+//   document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+// }
