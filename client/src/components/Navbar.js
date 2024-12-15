@@ -4,6 +4,24 @@ import '../assets/css/Navbar.css';
 import logo from '../assets/images/logo_transparent.png';
 
 function Navbar({ user, onUserChange }) {
+  const handleLogout = async () => {
+    try {
+      const response = await fetch('/logout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        onUserChange(null);
+      } else {
+        console.error('Failed to log out');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
   return (
     <nav className="navbar">
       <div className="navbar-brand">
@@ -32,8 +50,8 @@ function Navbar({ user, onUserChange }) {
         }
         </li>
         {user 
-        ? <li><text className="navbar-link" onClick={() => {onUserChange(null);}}>Logout</text></li>
-        : <></>
+        ? <li><text className="navbar-link" onClick={handleLogout}>Logout</text></li>
+        : null
         }
       </ul>
     </nav>
