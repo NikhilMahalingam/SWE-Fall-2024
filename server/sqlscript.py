@@ -30,7 +30,7 @@ def import_csv_to_databse(csv_file):
             header = next(csv_reader)
             row_number = 0
 
-            sqlite_insert_query = """INSERT INTO Computer_Part(part_name, brand, date_posted, unit_price, slug) VALUES (?, ?, ?, ?, ?, ?, ?)"""
+            sqlite_insert_query = """INSERT INTO Computer_Part(part_name, brand, date_posted, unit_price, slug, component_type, other_info) VALUES (?, ?, ?, ?, ?, ?, ?)"""
 
 
             cpu_insert_query ="""INSERT INTO Cpu(part_id, cores) VALUES (?, ?)"""
@@ -103,6 +103,95 @@ def import_csv_to_databse(csv_file):
             sqliteConnection.close()
             print("The SQLite connection is closed")
 
+def import_prebuilds(csv_file1):
+    try: 
+        sqliteConnection = sqlite3.connect('database.db')
+        cursor = sqliteConnection.cursor()
+        print("Successfully Connected to SQlite") 
+        with open(csv_file1, mode='r') as file:
+            csv_reader = csv.reader(file)
+            header = next(csv_reader)
+        
+
+            for row in csv_reader:
+                sqlite_insert_query = """INSERT INTO Pre_Build(build_name, build_price) VALUES (?, ?)"""
+
+                build_name = row[0]; 
+                build_price = row[1]; 
+
+                cursor.execute(sqlite_insert_query, (build_name, build_price))
+
+
+                sqliteConnection.commit()
+                
+            
+                    
+        print(f"Record of {cursor.rowcount} inserted successfully into SqliteDb_developers table", cursor.rowcount); 
+        cursor.close()
+        
+
+
+
+    except sqlite3.Error as error:
+        if "database is locked" in str(error):
+                print("Database is locked. Retrying...")
+                retries -= 1
+                time.sleep(2)  # Wait 2 seconds before retrying
+        else:
+            print("Failed to insert data into SQLite table", error)
+    finally:
+        if sqliteConnection: 
+            sqliteConnection.close()
+            print("The SQLite connection is closed")
+
+
+
+
+def import_uses(csv_file1):
+    try: 
+        sqliteConnection = sqlite3.connect('database.db')
+        cursor = sqliteConnection.cursor()
+        print("Successfully Connected to SQlite") 
+        with open(csv_file1, mode='r') as file:
+            csv_reader = csv.reader(file)
+            header = next(csv_reader)
+        
+
+            for row in csv_reader:
+                sqlite_insert_query = """INSERT INTO Uses(part_id, build_id) VALUES (?, ?)"""
+
+                part_id = row[0]; 
+                build_id= row[1]; 
+
+                cursor.execute(sqlite_insert_query, (part_id, build_id))
+
+
+                sqliteConnection.commit()
+                
+            
+                    
+        print(f"Record of {cursor.rowcount} inserted successfully into SqliteDb_developers table", cursor.rowcount); 
+        cursor.close()
+        
+
+
+
+    except sqlite3.Error as error:
+        if "database is locked" in str(error):
+                print("Database is locked. Retrying...")
+                retries -= 1
+                time.sleep(2)  # Wait 2 seconds before retrying
+        else:
+            print("Failed to insert data into SQLite table", error)
+    finally:
+        if sqliteConnection: 
+            sqliteConnection.close()
+            print("The SQLite connection is closed")
+
+
+
 
 import_csv_to_databse('computer_part.csv')
+import_prebuilds('prebuilts.csv')
+import_uses('uses.csv')
         
