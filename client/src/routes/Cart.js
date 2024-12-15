@@ -6,7 +6,7 @@ import CheckoutForm from '../components/CheckoutForm.js';
 const stripePromise = loadStripe("pk_test_51QOp2lDkIHmUkoEWbRxZrQrnRrdDlmUgNUt5LcZwqLXXnphXDLgE4xEFFWMheq8Mej7I862M9vUGU4cvzke43Ako00SvDsCa1t");
 
 
-function Cart({ user, cart, onCartChange, setCart }) {
+function Cart({ user, cart, onCartChange }) {
   const [showCheckout, setShowCheckout] = useState(false);
   const [clientSecret, setClientSecret] = useState(null);
 
@@ -55,7 +55,7 @@ function Cart({ user, cart, onCartChange, setCart }) {
         // Re-fetch the cart or manually remove from local cart state:
         fetch(`http://localhost:8000/cart?user_id=${user.user_id}`)
           .then((res) => res.json())
-          .then((updatedCart) => setCart(updatedCart))
+          .then((updatedCart) => onCartChange(updatedCart))
           .catch(console.error);
       } else {
         console.error('Remove failed:', data.error);

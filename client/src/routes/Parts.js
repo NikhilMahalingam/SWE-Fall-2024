@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { listPart } from '../api';
 import '../assets/css/Parts.css';
 
-const Parts = ({ cart, onCartChange, user, setCart }) => {
+const Parts = ({ cart, onCartChange, user }) => {
   const [parts, setParts] = useState([]);
   const [filteredParts, setFilteredParts] = useState([]);
   const [error, setError] = useState(null);
@@ -15,6 +15,7 @@ const Parts = ({ cart, onCartChange, user, setCart }) => {
     const fetchParts = async () => {
       try {
         const data = await listPart(selectedComponentType, undefined, searchQuery);
+        console.log("Fetched parts:", data); 
         setParts(data);
         setFilteredParts(data);
         console.log(data);
@@ -52,7 +53,7 @@ const Parts = ({ cart, onCartChange, user, setCart }) => {
         if (data.success) {
           fetch(`http://localhost:8000/cart?user_id=${user.user_id}`)
             .then(res => res.json())
-            .then(updatedCart => setCart(updatedCart))
+            .then(updatedCart => onCartChange(updatedCart))
             .catch(console.error);
         }
       })
