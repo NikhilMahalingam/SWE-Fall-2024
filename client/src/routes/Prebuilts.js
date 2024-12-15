@@ -40,10 +40,10 @@ const Prebuilts = ({ cart, onCartChange }) => {
             /> */}
             <div className="prebuilt-details">
               <div className="prebuilt-name">{prebuild.build_name}</div>
-              <div className="prebuilt-price">${prebuild.build_price}</div>
+              <div className="prebuilt-price">${prebuild.build_price.toFixed(2)}</div>
               <ul>
                 {prebuild.parts.map(part => 
-                  (<li>{part.part_name} - ${part.unit_price}</li>)
+                  (<li>{part.part_name} - ${part.unit_price.toFixed(2)}</li>)
                 )}
               </ul>
             </div>
