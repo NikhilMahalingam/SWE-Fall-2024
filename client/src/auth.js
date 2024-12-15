@@ -14,7 +14,8 @@
 // const auth = getAuth(app);
 
 export let createUserWithEmailAndPassword = async (name, email, password) => {
-  return fetch("/register", {
+  let serverUrl = 'http://localhost:8000'
+  return fetch(serverUrl + "/register", {
       method: "POST",
       headers: {
         Accept: 'application/json',
@@ -27,14 +28,15 @@ export let createUserWithEmailAndPassword = async (name, email, password) => {
       })
     }).then((resp) => {
       if (resp.status >= 400) {
-        throw new Error();
+        throw new Error(resp.json().error);
       }
     });
-    console.log('Password: ', password);
+    //console.log('Password: ', password);
 }
 
 export let signInWithEmailAndPassword = async (email, password) => {
-  return fetch("/login", {
+  let serverUrl = 'http://localhost:8000'
+  return fetch(serverUrl + "/login", {
       method: "POST",
       headers: {
         Accept: 'application/json',
@@ -46,7 +48,7 @@ export let signInWithEmailAndPassword = async (email, password) => {
         email
       })
     }).then((resp) => {
-      // console.log(resp.status);
+       console.log(resp.status);
       if (resp.status >= 400) {
         throw new Error(resp.json().error);
       } else if (resp.status === 200) {

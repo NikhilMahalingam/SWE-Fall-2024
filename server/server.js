@@ -11,8 +11,6 @@ import jwt from 'jsonwebtoken';
 import cookieParser from 'cookie-parser';
 import session from 'express-session';
 
-//const bycryptjs = require('bcryptjs');
-
 const route = express();
 route.use(cors());
 route.use(cookieParser());
@@ -105,6 +103,163 @@ route.post('/create-payment-intent', async (req, res) => {
   }
 });
 
+//cart endpoints
+route.get('/cart', (req, res) => {
+  const { user_id } = req.query;
+  if (!user_id) return res.status(400).json({ error: "Missing user_id" });
+
+  const findOrderSql = `
+    SELECT order_id FROM Parts_Order 
+    WHERE user_id = $user_id AND status = 'In Cart'
+    ORDER BY order_id DESC LIMIT 1
+  `;
+  db.get(findOrderSql, { $user_id: user_id }, (err, orderRow) => {
+    if (err) return res.status(500).json({ error: err.message });
+
+    if (!orderRow) {
+   
+      return res.json([]); 
+    }
+
+    const sql = `
+      SELECT Computer_Part.part_id, Computer_Part.part_name, 
+             Computer_Part.brand, Computer_Part.unit_price,
+             Consists.quantity
+      FROM Consists
+      INNER JOIN Computer_Part ON Consists.part_id = Computer_Part.part_id
+      WHERE Consists.order_id = $order_id
+    `;
+    db.all(sql, { $order_id: orderRow.order_id }, (err2, rows) => {
+      if (err2) return res.status(500).json({ error: err2.message });
+      res.json(rows);
+    });
+  });
+});
+
+route.post('/cart/add', (req, res) => {
+  const { user_id, part_id } = req.body;
+  if (!user_id || !part_id) {
+    return res.status(400).json({ error: "Missing user_id or part_id." });
+  }
+  const findOrderSql = `
+    SELECT order_id FROM Parts_Order 
+    WHERE user_id = $user_id AND status = 'In Cart'
+    ORDER BY order_id DESC LIMIT 1
+  `;
+  db.get(findOrderSql, { $user_id: user_id }, (err, orderRow) => {
+    if (err) return res.status(500).json({ error: err.message });
+
+    if (!orderRow) {
+  
+      const createOrderSql = `
+        INSERT INTO Parts_Order (date, status, user_id)
+        VALUES (datetime('now'), 'In Cart', $user_id)
+      `;
+      db.run(createOrderSql, { $user_id: user_id }, function(err2) {
+        if (err2) return res.status(500).json({ error: err2.message });
+        const newOrderId = this.lastID;
+        addOrUpdateConsists(newOrderId, part_id, 1, res);
+      });
+    } else {
+      addOrUpdateConsists(orderRow.order_id, part_id, 1, res);
+    }
+  });
+});
+
+function addOrUpdateConsists(order_id, part_id, quantity, res) {
+  const checkConsistsSql = `
+    SELECT quantity FROM Consists 
+    WHERE order_id = $order_id AND part_id = $part_id
+  `;
+  db.get(checkConsistsSql, { $order_id: order_id, $part_id: part_id }, (err, row) => {
+    if (err) return res.status(500).json({ error: err.message });
+
+    if (row) {
+
+      const newQuantity = row.quantity + quantity;
+      db.run(
+        "UPDATE Consists SET quantity = $quantity WHERE order_id = $order_id AND part_id = $part_id",
+        { $quantity: newQuantity, $order_id: order_id, $part_id: part_id },
+        function (err2) {
+          if (err2) return res.status(500).json({ error: err2.message });
+          res.json({ success: true, message: 'Quantity updated' });
+        }
+      );
+    } else {
+      db.run(
+        "INSERT INTO Consists (part_id, order_id, quantity) VALUES ($part_id, $order_id, $quantity)",
+        { $part_id: part_id, $order_id: order_id, $quantity: quantity },
+        function (err2) {
+          if (err2) return res.status(500).json({ error: err2.message });
+          res.json({ success: true, message: 'Part added to cart' });
+        }
+      );
+    }
+  });
+}
+
+route.patch('/cart/remove', (req, res) => {
+  const { user_id, part_id } = req.body;
+  if (!user_id || !part_id) {
+    return res.status(400).json({ error: "Missing user_id or part_id." });
+  }
+
+  const findOrderSql = `
+    SELECT order_id FROM Parts_Order 
+    WHERE user_id = $user_id AND status = 'In Cart'
+    ORDER BY order_id DESC LIMIT 1
+  `;
+  db.get(findOrderSql, { $user_id: user_id }, (err, orderRow) => {
+    if (err) return res.status(500).json({ error: err.message });
+
+    if (!orderRow) {
+      return res.status(400).json({ error: "No active cart found for user" });
+    }
+
+    // 1. Fetch the current quantity
+    const getConsistsSql = `
+      SELECT quantity FROM Consists
+      WHERE order_id = $order_id AND part_id = $part_id
+    `;
+    db.get(getConsistsSql, { $order_id: orderRow.order_id, $part_id: part_id }, (err2, row) => {
+      if (err2) return res.status(500).json({ error: err2.message });
+      if (!row) return res.status(400).json({ error: "Item not found in cart" });
+
+      let newQuantity = row.quantity - 1;
+
+      if (newQuantity <= 0) {
+        // If quantity after decrement is 0, remove the row entirely
+        const deleteSql = `
+          DELETE FROM Consists 
+          WHERE order_id = $order_id AND part_id = $part_id
+        `;
+        db.run(deleteSql, { $order_id: orderRow.order_id, $part_id: part_id }, function(delErr) {
+          if (delErr) return res.status(500).json({ error: delErr.message });
+          return res.json({ success: true, message: 'Item removed from cart (quantity was 1).'});
+        });
+      } else {
+        // Otherwise, just decrement
+        const updateSql = `
+          UPDATE Consists SET quantity = $newQuantity
+          WHERE order_id = $order_id AND part_id = $part_id
+        `;
+        db.run(updateSql, {
+          $newQuantity: newQuantity,
+          $order_id: orderRow.order_id,
+          $part_id: part_id
+        }, function(updateErr) {
+          if (updateErr) return res.status(500).json({ error: updateErr.message });
+          res.json({ success: true, message: 'Quantity decremented', newQuantity });
+        });
+      }
+    });
+  });
+});
+
+
+
+
+
 route.post('/register', async (req, res) => {
   const { name, email, password } = req.body;
   console.log(password); 
@@ -112,11 +267,17 @@ route.post('/register', async (req, res) => {
     res.status(400).json({ error: 'Bad email/password' });
     return;
   }
+
+  if (!email.match(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/)) {
+    res.status(400).json({ error: 'Email not in proper format' });
+    return;
+  }
   hashPassword(password).then((hash) => {
     try{ 
       db.run("INSERT INTO User_Account (name, password, email, isAdmin) VALUES ($name, $password, $email, 0);", {$name: name, $email: email, $password: hash}, function (err) {
         if (err) throw err;
-        res.status(201).json({id: this.lastID});
+        if (!this.changes) res.status(400).json({ error: 'Bad email/password' });
+      else res.status(201).json({id: this.lastID});
       });
     } catch (err) {
       res.status(400).json({ error: process.env.DEBUG ? err.toString() : 'Failed' });
@@ -171,108 +332,11 @@ route.listen(port, () => {
   console.log(`Server is listening on port ${port}.`);
 });
 
-//redundant?
-/*
-route.get('/listpart', (req, res) => {
-  try {
-    db.all("SELECT part_name, brand, unit_price, slug FROM Computer_Part", [], (err, rows) => {
-      if (err) {
-        res.status(500).json({ error: "Database error", details: err.message });
-        return;
-      }
-      res.status(200).json(rows);
-    });
-  } catch (error) {
-    res.status(500).json({ error: "Server error", details: error.message });
-  }
-});
-*/
-
-/*
-route.get('/listpart/components', async (req, res) => {
-  const { componentType } = req.query;
-
-  let query = 'SELECT part_name, brand, unit_price, slug FROM Computer_Part';
-
-  if (componentType) {
-    switch (componentType) {
-      case 'cpu':
-        query += ' WHERE EXISTS (SELECT 1 FROM Cpu WHERE Cpu.part_id = Computer_Part.part_id)';
-        break;
-      case 'gpu':
-        query += ' WHERE EXISTS (SELECT 1 FROM Gpu WHERE Gpu.part_id = Computer_Part.part_id)';
-        break;
-      case 'storage':
-        query += ' WHERE EXISTS (SELECT 1 FROM Storage_Device WHERE Storage_Device.part_id = Computer_Part.part_id)';
-        break;
-      case 'motherboard':
-        query += ' WHERE EXISTS (SELECT 1 FROM Motherboard WHERE Motherboard.part_id = Computer_Part.part_id)';
-        break;
-      case 'case':
-        query += ' WHERE EXISTS (SELECT 1 FROM Computer_case WHERE Computer_case.part_id = Computer_Part.part_id)';
-        break;
-      case 'cooling':
-        query += ' WHERE EXISTS (SELECT 1 FROM Cooling WHERE Cooling.part_id = Computer_Part.part_id)';
-        break;
-      case 'all':
-        // For 'all', just return all parts without filtering
-        break;
-      default:
-        return res.status(400).send('Invalid component type');
-    }
-  }
-
-  console.log('Executing query:', query);  // Log the query for debugging
-
-  try {
-    // Execute the query using db.all
-    db.all(query, [], (err, rows) => {
-      if (err) {
-        return res.status(500).json({ error: "Database error", details: err.message });
-      }
-
-      // Send the results as JSON
-      res.status(200).json(rows);
-    });
-  } catch (error) {
-    // Handle server-side errors
-    res.status(500).json({ error: "Server error", details: error.message });
-  }
-
-});
-
-route.get('/listpart/search', async (req, res) => {
-  const {searchQuery} = req.query; 
-  let sqlQuery = 
-  `
-    SELECT part_name, brand, unit_price, slug FROM Computer_Part
-    WHERE part_name LIKE '%${searchQuery}%';
-  `;
-
-  console.log('Executing query:', sqlQuery);  // Log the query for debugging
-
-  try {
-    // Execute the query using db.all
-    db.all(sqlQuery, [], (err, rows) => {
-      if (err) {
-        return res.status(500).json({ error: "Database error", details: err.message });
-      }
-
-      // Send the results as JSON
-      res.status(200).json(rows);
-    });
-  } catch (error) {
-    // Handle server-side errors
-    res.status(500).json({ error: "Server error", details: error.message });
-  } 
-});
-*/
-
 //more general listpart function with ability to filter by component type, attributes within each component
 //and search within the filtered results
 route.get('/listpart', async (req, res) => {
   const{searchQuery, componentType, componentAttribute} = req.query;
-  let query = 'SELECT part_name, brand, unit_price, slug FROM Computer_Part';
+  let query = 'SELECT part_id, part_name, brand, unit_price, slug FROM Computer_Part';
 
   if (componentType) {
     switch (componentType) {
