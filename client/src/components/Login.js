@@ -16,16 +16,17 @@ function Login({user, onUserChange}) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-
+  
     try {
-      onUserChange(await signInWithEmailAndPassword(username, password)); 
-      navigate(from, { replace: true }); // Redirect to the intended route
+      const user = await signInWithEmailAndPassword(username, password); 
+      localStorage.setItem('user', JSON.stringify(user)); // Save user in localStorage
+      onUserChange(user);
+      navigate(from, { replace: true });
     } catch (error) {
       setError(error.message || 'Login failed. Please try again.');
     }
   };
-
-
+  
   return (
     <div className="login-page">
       <div className="login-container">

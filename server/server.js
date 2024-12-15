@@ -10,6 +10,7 @@ import bcryptjs from 'bcryptjs'; // Corrected typo
 import jwt from 'jsonwebtoken';
 import cookieParser from 'cookie-parser';
 import session from 'express-session';
+import { sleep } from 'openai/core.mjs';
 
 const route = express();
 route.use(cors());
@@ -198,12 +199,12 @@ function addOrUpdateConsists(order_id, part_id, quantity, res) {
   });
 }
 
-route.patch('/cart/remove', (req, res) => {
+route.delete('/cart/remove', (req, res) => {
   const { user_id, part_id } = req.body;
+
   if (!user_id || !part_id) {
     return res.status(400).json({ error: "Missing user_id or part_id." });
   }
-
   const findOrderSql = `
     SELECT order_id FROM Parts_Order 
     WHERE user_id = $user_id AND status = 'In Cart'
@@ -216,47 +217,34 @@ route.patch('/cart/remove', (req, res) => {
       return res.status(400).json({ error: "No active cart found for user" });
     }
 
-    // 1. Fetch the current quantity
-    const getConsistsSql = `
-      SELECT quantity FROM Consists
+    const deleteSql = `
+      DELETE FROM Consists
       WHERE order_id = $order_id AND part_id = $part_id
     `;
-    db.get(getConsistsSql, { $order_id: orderRow.order_id, $part_id: part_id }, (err2, row) => {
-      if (err2) return res.status(500).json({ error: err2.message });
-      if (!row) return res.status(400).json({ error: "Item not found in cart" });
-
-      let newQuantity = row.quantity - 1;
-
-      if (newQuantity <= 0) {
-        // If quantity after decrement is 0, remove the row entirely
-        const deleteSql = `
-          DELETE FROM Consists 
-          WHERE order_id = $order_id AND part_id = $part_id
-        `;
-        db.run(deleteSql, { $order_id: orderRow.order_id, $part_id: part_id }, function(delErr) {
-          if (delErr) return res.status(500).json({ error: delErr.message });
-          return res.json({ success: true, message: 'Item removed from cart (quantity was 1).'});
-        });
-      } else {
-        // Otherwise, just decrement
-        const updateSql = `
-          UPDATE Consists SET quantity = $newQuantity
-          WHERE order_id = $order_id AND part_id = $part_id
-        `;
-        db.run(updateSql, {
-          $newQuantity: newQuantity,
-          $order_id: orderRow.order_id,
-          $part_id: part_id
-        }, function(updateErr) {
-          if (updateErr) return res.status(500).json({ error: updateErr.message });
-          res.json({ success: true, message: 'Quantity decremented', newQuantity });
-        });
+    db.run(deleteSql, { $order_id: orderRow.order_id, $part_id: part_id }, function (deleteErr) {
+      if (deleteErr) return res.status(500).json({ error: deleteErr.message });
+      if (this.changes === 0) {
+        return res.status(400).json({ error: "Item not found in cart" });
       }
+      res.json({ success: true, message: 'Part removed from cart' });
     });
   });
 });
 
 
+route.get('/get-part-id', (req, res) => {
+  const { part_name } = req.query;
+  if (!part_name) {
+    return res.status(400).json({ error: 'Part name is required.' });
+  }
+
+  const sql = `SELECT part_id FROM Computer_Part WHERE part_name LIKE $part_name LIMIT 1`;
+  db.get(sql, { $part_name: `%${part_name}%` }, (err, row) => {
+    if (err) return res.status(500).json({ error: err.message });
+    if (!row) return res.status(404).json({ error: 'Part not found.' });
+    res.json({ part_id: row.part_id });
+  });
+});
 
 
 
@@ -423,13 +411,54 @@ route.get('/listpart', async (req, res) => {
 });
 
 route.get('/listprebuilt', (req, res) => {
-  try {
-    db.all("SELECT build_name, build_price FROM Pre_Build", [], (err, rows) => {
+  try { 
+    db.all("SELECT * FROM Pre_Build P JOIN Uses U ON P.build_id = U.build_id JOIN Computer_Part CP ON CP.part_id = U.part_id ORDER BY P.build_id", [], (err, rows) => {
       if (err) {
         res.status(500).json({ error: "Database error", details: err.message });
         return;
       }
+      let preBuilds = [];
+      let parts = [];
+      rows.map(row => {
+        const pBuild = {
+          build_id: row.build_id,
+          build_name: row.build_name,
+          build_price: row.build_price,
+          parts: [],
+        };
+        parts.push({
+          brand: row.brand, 
+          component_type: row.component_type,
+          date_posted: row.date_posted,
+          part_id: row.part_id,
+          part_name: row.part_name
+        });
+      });
       res.status(200).json(rows);
+      // console.log(rows);
+      // preBuildWithParts = rows.map((row) => {
+      //   let parts = null;
+      //   db.all(`SELECT * FROM Uses WHERE build_id = ${row.build_id}`, [], (err, rows) => {
+      //     if (err) {
+      //       res.status(500).json({ error: "Database error", details: err.message });
+      //       return;
+      //     }
+      //     console.log("use rows:", rows);
+      //     parts = rows;
+      //     console.log("parts:", parts);
+      //   });
+      //   console.log("Outside use query", parts);
+      //   setTimeout(() => {return {
+      //     ...row,
+      //     parts: parts,
+      //   }}, 5000);
+      //   // res.status(200).json(preBuildWithParts);
+      // });
+      // // console.log("After appending parts", preBuildWithParts);
+      // setTimeout(() => {
+      //   console.log("After appending parts", preBuildWithParts);
+      //   res.status(200).json(preBuildWithParts);
+      // }, 1000);
     });
   } catch (error) {
     res.status(500).json({ error: "Server error", details: error.message });

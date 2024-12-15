@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate} from 'react-router-dom';
 
 import logo from './assets/images/logo_transparent.png';
@@ -10,12 +10,35 @@ import AppRoutes from './routes/AppRoutes';
 
 function App() {
   let [cart, setCart] = useState([]);
-  let [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => {
+    const savedUser = localStorage.getItem('user');
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
+
+  useEffect(() => {
+    if (user && user.user_id) {
+      fetch(`http://localhost:8000/cart?user_id=${user.user_id}`)
+        .then((res) => res.json())
+        .then((data) => {
+          setCart(data);
+        })
+        .catch((err) => console.error('Error fetching cart:', err));
+    } else {
+      setCart([]); 
+    }
+  }, [user]);
+
+  const handleLogout = () => {
+    setUser(null);
+    setCart([]);
+    localStorage.removeItem('user');
+  };
+
 
   return (
     <Router>
       <div className="App">
-        <Navbar user={user}/>
+        <Navbar user={user} onUserChange={handleLogout}/>
         
           <AppRoutes cart={cart} user={user} onUserChange={setUser} onCartChange={setCart} />
           {/* <Route path="/login" element={<Login />} />

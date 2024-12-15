@@ -78,3 +78,30 @@ export async function generatePCBuild(description) {
     throw error;
   }
 }
+
+export const fetchPartIdByName = async (partName) => {
+  const response = await fetch(`http://localhost:8000/get-part-id?part_name=${encodeURIComponent(partName)}`);
+  if (!response.ok) {
+    throw new Error('Failed to fetch part ID');
+  }
+  return response.json();
+};
+
+export async function checkPartAvailability(partName) {
+  try {
+    const response = await fetch(
+      `http://localhost:8000/check-part-availability?partName=${encodeURIComponent(partName)}`
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.inStock;
+  } catch (error) {
+    console.error('Error checking part availability:', error.message);
+    throw error;
+  }
+}
+
