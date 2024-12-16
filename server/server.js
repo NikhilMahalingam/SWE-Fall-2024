@@ -583,7 +583,7 @@ route.get("*", (req, res)=> {
   res.sendFile(path.resolve('..', 'client', 'build', 'index.html'));
 });
 
-route.post('/complete-order', async (req, res) => {
+route.patch('/complete-order', async (req, res) => {
   const { user_id, order_id } = req.body;
   if (!user_id || !order_id) {
     return res.status(400).json({ error: "Missing user_id or part_id." });

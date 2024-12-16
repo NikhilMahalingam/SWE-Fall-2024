@@ -30,7 +30,7 @@ const CheckoutForm = ({ clientSecret, user, cart, onCartChange }) => {  // Accep
       console.log(cart);
       console.log({ user_id: user.user_id, order_id: cart.order_id });
       const response = await fetch('http://localhost:8000/complete-order', {
-        method: 'POST',
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: user.user_id, order_id: cart.order_id })  
       });
