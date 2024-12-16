@@ -21,7 +21,7 @@ function Home() {
       <header className="Home-header">
         <h1>Welcome to PC Composer!</h1>
         <p>Want to compose beautiful personal computers?</p>
-        <p>computers? PC Composer easily achieves this</p>
+        <p>PC Composer easily achieves this</p>
         <p>using our chatbot, prebuilts, and custom-made</p>
         <p>database of parts.</p>
 
