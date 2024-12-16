@@ -55,7 +55,7 @@ export let signInWithEmailAndPassword = async (email, password) => {
         return resp.json().then((obj) => obj.user);
         // auth.currentUser = body.user;
       } else {
-        throw new Error("This should not happen.");
+        throw new Error("System error. Please contact our customer service.");
       }
     });
 }
